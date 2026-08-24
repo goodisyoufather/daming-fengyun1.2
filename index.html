@@ -1422,6 +1422,7 @@
 <base target="_blank">
 <base target="_blank">
 <base target="_blank">
+<base target="_blank">
 </head>
 <body>
 <!-- 登录界面 -->
@@ -9102,67 +9103,12 @@ let isMobile = false;
 
 // ============ 开局设备检测（圆点测试） ============
 function initDeviceTest() {
+  // 直接跳过设备检测，避免移动端 touch 事件被阻止导致卡住
   const overlay = document.getElementById('device-test-overlay');
-  const dot = document.getElementById('device-test-dot');
-  if (!overlay || !dot) {
-    detectMobile();
-    initLoginScreen();
-    return;
-  }
-
-  let detected = false;
-  let countdown = 5;
-
-  function finish(isTouchDevice) {
-    if (detected) return;
-    detected = true;
-    isMobile = isTouchDevice;
-    clearInterval(timer);
-
-    // 视觉反馈
-    dot.textContent = isTouchDevice ? '📱' : '🖥️';
-    dot.style.animation = 'none';
-
-    // 直接移除覆盖层，不做过渡动画避免卡住
-    overlay.style.display = 'none';
-
-    // 继续初始化
-    detectMobile();
-    initMobileUI();
-    initLoginScreen();
-  }
-
-  // 触摸事件 = 手机（优先）
-  dot.addEventListener('touchstart', function onTouch(e) {
-    e.preventDefault();
-    finish(true);
-  }, { passive: false });
-
-  // 鼠标点击 = PC
-  dot.addEventListener('click', function onClick(e) {
-    e.stopPropagation();
-    finish(false);
-  });
-
-  // 键盘回车/空格 = PC
-  dot.setAttribute('tabindex', '0');
-  dot.addEventListener('keydown', function onKey(e) {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      finish(false);
-    }
-  });
-
-  // 5秒倒计时，无响应自动判定 PC
-  const timerEl = document.getElementById('device-test-timer');
-  const timer = setInterval(function tick() {
-    countdown--;
-    if (timerEl) timerEl.textContent = countdown + '秒后自动进入...';
-    if (countdown <= 0) {
-      clearInterval(timer);
-      if (!detected) finish(false);
-    }
-  }, 1000);
+  if (overlay) overlay.style.display = 'none';
+  detectMobile();
+  initMobileUI();
+  initLoginScreen();
 }
 
 function detectMobile() {
