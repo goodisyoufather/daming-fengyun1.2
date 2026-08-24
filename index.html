@@ -2065,7 +2065,7 @@ const PUSHER_CONFIG = {
   channel: 'presence-daming-fengyun',
   // ⚠️ 部署后把 apiUrl 改成你的公网域名，例如 'https://daming.up.railway.app'
   // 本地测试用 'http://localhost:3000'
-  apiUrl: ''
+  apiUrl: 'https://daming-fengyun12-production.up.railway.app'
 };
 
 // ============ AI大元王朝配置 ============
@@ -2205,6 +2205,8 @@ const BASE_INCOME_PER_TURN = {
   tech: 0
 };
 
+let lastChatTime = 0;
+const CHAT_COOLDOWN_MS = 5000; // 5秒聊天冷却
 // ============ 游戏状态 ============
 let gameState = {
   turn: 1,
@@ -8725,6 +8727,16 @@ function escapeHtml(text) {
 
 function sendChatMessage() {
   if (isSpectator) return;
+
+  // 聊天冷却检查
+  const now = Date.now();
+  if (now - lastChatTime < CHAT_COOLDOWN_MS) {
+    const remain = Math.ceil((CHAT_COOLDOWN_MS - (now - lastChatTime)) / 1000);
+    alert('作者服务器不够用了..资金不够 用的是免费\n请 ' + remain + ' 秒后再发消息');
+    return;
+  }
+  lastChatTime = now;
+
   const input = document.getElementById('chat-input');
   const text = input.value.trim();
   if (!text) return;
