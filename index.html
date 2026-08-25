@@ -1560,6 +1560,8 @@
     <button class="pixel-btn notif-btn help-btn" id="btn-help" title="新手帮助">
       <span>?</span>
     </button>
+    <button class="pixel-btn notif-btn" id="btn-sfx-toggle" title="切换音效" style="font-size:11px;padding:4px 8px;">🔊 音效</button>
+    <button class="pixel-btn notif-btn" id="btn-bgm-toggle" title="切换背景音乐" style="font-size:11px;padding:4px 8px;">🎵 音乐</button>
     <div class="online-count" id="online-count">在线: 0/250</div>
   </div>
 
@@ -2065,7 +2067,286 @@ const PUSHER_CONFIG = {
   channel: 'presence-daming-fengyun',
   // ⚠️ 部署后把 apiUrl 改成你的公网域名，例如 'https://daming.up.railway.app'
   // 本地测试用 'http://localhost:3000'
-  apiUrl: 'https://daming-fengyun12-production.up.railway.app'
+  apiUrl: ''
+};
+
+
+// ============ 背景音乐配置 ============
+// ⚠️ 请将《精卫》音频文件放到服务器目录，或替换为有效URL
+// 支持格式: mp3, ogg, wav
+const BGM_CONFIG = {
+  // 主链接：放在服务器同级 bgm 目录下
+  url: './bgm/jingwei.mp3',
+  // 备用链接（CDN或外部链接）
+  fallbackUrl: '',
+  // 是否自动播放（浏览器策略可能需要用户交互后才能播放）
+  autoplay: true
+};
+
+// 音效文件配置
+const SFX_CONFIG = {
+  click: './mouse-click-sound.mp3',   // 按钮点击音
+  success: '',  // 成功音效（留空使用合成音）
+  error: ''     // 错误音效（留空使用合成音）
+};
+
+// ============ 音效系统 ============
+const AudioManager = {
+  bgm: null,
+  sfxEnabled: true,
+  bgmEnabled: true,
+  masterVolume: 0.5,
+  audioCtx: null,
+  bgmStarted: false,
+
+  init() {
+    // 从 localStorage 读取设置
+    try {
+      const saved = localStorage.getItem('df_audio_settings');
+      if (saved) {
+        const s = JSON.parse(saved);
+        this.sfxEnabled = s.sfxEnabled !== false;
+        this.bgmEnabled = s.bgmEnabled !== false;
+        this.masterVolume = s.masterVolume ?? 0.5;
+      }
+    } catch(e) {}
+
+    // 初始化 BGM Audio 对象
+    this.bgm = new Audio();
+    this.bgm.loop = true;
+    this.bgm.volume = this.masterVolume * 0.35;
+
+    // 预加载点击音效（使用真实音频文件）
+    if (SFX_CONFIG.click) {
+      this.clickSound = new Audio(SFX_CONFIG.click);
+      this.clickSound.volume = this.masterVolume * 0.4;
+      this.clickSound.preload = 'auto';
+    }
+
+    // 初始化 Web Audio Context（用于合成音效，作为备选）
+    try {
+      this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    } catch(e) {
+      console.warn('[Audio] Web Audio API 不支持，合成音效将不可用');
+    }
+
+    // 全局按钮点击音效（事件委托）
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest('.pixel-btn');
+      if (btn && !btn.disabled) {
+        this.playClick();
+      }
+    });
+
+    // 全局触摸反馈音效
+    document.addEventListener('touchstart', (e) => {
+      const btn = e.target.closest('.pixel-btn');
+      if (btn && !btn.disabled) {
+        this.playClick();
+      }
+    }, { passive: true });
+
+    this.updateUI();
+    console.log('[Audio] 音效系统初始化完成');
+  },
+
+  // 按钮点击音效：优先使用真实音频文件，回退到合成音
+  playClick() {
+    if (!this.sfxEnabled) return;
+
+    // 优先使用真实音频文件
+    if (this.clickSound) {
+      try {
+        this.clickSound.currentTime = 0;
+        this.clickSound.volume = this.masterVolume * 0.4;
+        this.clickSound.play().catch(() => {
+          // 播放失败时回退到合成音
+          this._playSynthClick();
+        });
+        return;
+      } catch(e) {}
+    }
+
+    // 回退：使用 Web Audio API 合成
+    this._playSynthClick();
+  },
+
+  // 合成点击音效（8-bit风格，作为备选）
+  _playSynthClick() {
+    if (!this.audioCtx) return;
+    try {
+      if (this.audioCtx.state === 'suspended') {
+        this.audioCtx.resume();
+      }
+      const ctx = this.audioCtx;
+      const t = ctx.currentTime;
+
+      // 主音：方波，从 880Hz 滑到 440Hz，典型的 8-bit "哔" 声
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(880, t);
+      osc.frequency.exponentialRampToValueAtTime(440, t + 0.06);
+      gain.gain.setValueAtTime(this.masterVolume * 0.12, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.06);
+      osc.start(t);
+      osc.stop(t + 0.06);
+
+      // 叠加一个高频噪声，增加"咔嗒"感
+      const noise = ctx.createOscillator();
+      const noiseGain = ctx.createGain();
+      noise.connect(noiseGain);
+      noiseGain.connect(ctx.destination);
+      noise.type = 'triangle';
+      noise.frequency.setValueAtTime(2200, t);
+      noiseGain.gain.setValueAtTime(this.masterVolume * 0.03, t);
+      noiseGain.gain.exponentialRampToValueAtTime(0.001, t + 0.02);
+      noise.start(t);
+      noise.stop(t + 0.02);
+    } catch(e) {}
+  },
+
+  // 播放成功/确认音效（比点击音更明亮）
+  playSuccess() {
+    if (!this.sfxEnabled || !this.audioCtx) return;
+    try {
+      if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
+      const ctx = this.audioCtx;
+      const t = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(523, t);       // C5
+      osc.frequency.setValueAtTime(659, t + 0.08); // E5
+      osc.frequency.setValueAtTime(784, t + 0.16); // G5
+      gain.gain.setValueAtTime(this.masterVolume * 0.12, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+      osc.start(t);
+      osc.stop(t + 0.25);
+    } catch(e) {}
+  },
+
+  // 播放错误/警告音效
+  playError() {
+    if (!this.sfxEnabled || !this.audioCtx) return;
+    try {
+      if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
+      const ctx = this.audioCtx;
+      const t = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(200, t);
+      osc.frequency.exponentialRampToValueAtTime(100, t + 0.15);
+      gain.gain.setValueAtTime(this.masterVolume * 0.1, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+      osc.start(t);
+      osc.stop(t + 0.15);
+    } catch(e) {}
+  },
+
+  // 播放背景音乐
+  playBGM(url) {
+    if (!this.bgm || !this.bgmEnabled) return;
+    if (!url) {
+      console.log('[Audio] BGM URL 未设置，跳过播放');
+      return;
+    }
+    this.bgm.src = url;
+    this.bgm.volume = this.masterVolume * 0.35;
+    this.bgmStarted = true;
+
+    const tryPlay = () => {
+      this.bgm.play().then(() => {
+        console.log('[Audio] BGM 开始播放');
+      }).catch(err => {
+        console.log('[Audio] BGM 自动播放被阻止，等待用户交互...');
+        // 浏览器自动播放策略：等待第一次用户点击
+        const resume = () => {
+          if (this.bgmEnabled && this.bgm) {
+            this.bgm.play().catch(() => {});
+          }
+          document.removeEventListener('click', resume);
+          document.removeEventListener('touchstart', resume);
+        };
+        document.addEventListener('click', resume, { once: true });
+        document.addEventListener('touchstart', resume, { once: true });
+      });
+    };
+
+    // 延迟一点播放，避免与页面加载冲突
+    setTimeout(tryPlay, 300);
+  },
+
+  stopBGM() {
+    if (this.bgm) {
+      this.bgm.pause();
+      this.bgm.currentTime = 0;
+    }
+    this.bgmStarted = false;
+  },
+
+  toggleSFX() {
+    this.sfxEnabled = !this.sfxEnabled;
+    this.save();
+    this.updateUI();
+    // 播放一个测试音让用户知道开关状态
+    if (this.sfxEnabled) this.playClick();
+    addSystemChat('world', this.sfxEnabled ? '🔊 音效已开启' : '🔇 音效已关闭');
+  },
+
+  toggleBGM() {
+    this.bgmEnabled = !this.bgmEnabled;
+    if (this.bgmEnabled) {
+      if (this.bgm && this.bgm.src) {
+        this.bgm.play().catch(() => {});
+      } else if (BGM_CONFIG.url) {
+        this.playBGM(BGM_CONFIG.url);
+      }
+    } else {
+      this.stopBGM();
+    }
+    this.save();
+    this.updateUI();
+    addSystemChat('world', this.bgmEnabled ? '🎵 背景音乐已开启' : '🎵 背景音乐已关闭');
+  },
+
+  setVolume(v) {
+    this.masterVolume = Math.max(0, Math.min(1, v));
+    if (this.bgm) this.bgm.volume = this.masterVolume * 0.35;
+    if (this.clickSound) this.clickSound.volume = this.masterVolume * 0.4;
+    this.save();
+  },
+
+  save() {
+    try {
+      localStorage.setItem('df_audio_settings', JSON.stringify({
+        sfxEnabled: this.sfxEnabled,
+        bgmEnabled: this.bgmEnabled,
+        masterVolume: this.masterVolume
+      }));
+    } catch(e) {}
+  },
+
+  updateUI() {
+    const sfxBtn = document.getElementById('btn-sfx-toggle');
+    const bgmBtn = document.getElementById('btn-bgm-toggle');
+    if (sfxBtn) {
+      sfxBtn.innerHTML = this.sfxEnabled ? '<span>🔊</span>' : '<span>🔇</span>';
+      sfxBtn.title = this.sfxEnabled ? '音效已开启，点击关闭' : '音效已关闭，点击开启';
+    }
+    if (bgmBtn) {
+      bgmBtn.innerHTML = this.bgmEnabled ? '<span>🎵</span>' : '<span>🎵</span>';
+      bgmBtn.title = this.bgmEnabled ? '音乐已开启，点击关闭' : '音乐已关闭，点击开启';
+      bgmBtn.style.opacity = this.bgmEnabled ? '1' : '0.4';
+    }
+  }
 };
 
 // ============ AI大元王朝配置 ============
@@ -2205,8 +2486,6 @@ const BASE_INCOME_PER_TURN = {
   tech: 0
 };
 
-let lastChatTime = 0;
-const CHAT_COOLDOWN_MS = 5000; // 5秒聊天冷却
 // ============ 游戏状态 ============
 let gameState = {
   turn: 1,
@@ -4878,6 +5157,25 @@ function showTurnNotification(text) {
   el.textContent = '第 ' + text + ' 开始';
   el.classList.add('show');
   setTimeout(() => el.classList.remove('show'), 2000);
+  // 回合提示音（柔和的钟声）
+  if (AudioManager.sfxEnabled && AudioManager.audioCtx) {
+    try {
+      const ctx = AudioManager.audioCtx;
+      const t = ctx.currentTime;
+      [523, 659, 784].forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, t + i * 0.12);
+        gain.gain.setValueAtTime(AudioManager.masterVolume * 0.08, t + i * 0.12);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + i * 0.12 + 0.3);
+        osc.start(t + i * 0.12);
+        osc.stop(t + i * 0.12 + 0.3);
+      });
+    } catch(e) {}
+  }
 }
 
 // ============ 登录系统 ============
@@ -5197,6 +5495,7 @@ function startGame() {
     
     const nameInput = document.getElementById('player-name').value.trim();
     if (!nameInput) {
+      AudioManager.playError();
       throw new Error('请输入玩家姓名');
     }
     playerName = nameInput;
@@ -5206,6 +5505,7 @@ function startGame() {
       p => p.name === playerName
     );
     if (nameExists) {
+      AudioManager.playError();
       throw new Error('该玩家姓名已存在，请更换姓名');
     }
     
@@ -5251,7 +5551,8 @@ function startGame() {
     if (loginMode === 'new') {
       const countryName = document.getElementById('country-name').value.trim();
       if (!countryName) {
-        throw new Error('请输入国家名称');
+        AudioManager.playError();
+      throw new Error('请输入国家名称');
       }
       
       // 国家名称重复检测
@@ -5259,7 +5560,8 @@ function startGame() {
         c => c.name === countryName
       );
       if (countryExists) {
-        throw new Error('该国家名称已存在，请更换名称');
+        AudioManager.playError();
+      throw new Error('该国家名称已存在，请更换名称');
       }
       
       createCountry(playerName, countryName, selectedColor);
@@ -5574,6 +5876,11 @@ function enterGame() {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('game-root').style.display = 'flex';
   
+  // 播放背景音乐（进入游戏后）
+  if (BGM_CONFIG.url) {
+    AudioManager.playBGM(BGM_CONFIG.url);
+  }
+
   // 观战模式处理
   if (isSpectator) {
     document.getElementById('spectator-badge').style.display = 'inline-block';
@@ -6770,6 +7077,7 @@ function buildBuilding(cityId, buildingType) {
     return;
   }
   if (country.resources.gold < b.cost.gold || country.resources.food < b.cost.food) {
+    AudioManager.playError();
     alert('资源不足！');
     return;
   }
@@ -7261,7 +7569,7 @@ let recruitCityId = null;
 function openRecruitMenu() {
   // 先选择征兵城市
   const myCities = Object.values(gameState.cities).filter(c => c.countryId === myCountryId);
-  if (myCities.length === 0) { alert('你的国家没有城市！'); return; }
+  if (myCities.length === 0) { AudioManager.playError(); alert('你的国家没有城市！'); return; }
   if (myCities.length === 1) {
     recruitCityId = myCities[0].id;
     showRecruitGrid();
@@ -7349,6 +7657,7 @@ function recruitUnit(unitType, count) {
   if (country.resources.gold < totalCost.gold ||
       country.resources.food < totalCost.food ||
       country.resources.energy < totalCost.energy) {
+    AudioManager.playError();
     alert('资源不足！');
     return;
   }
@@ -7356,6 +7665,7 @@ function recruitUnit(unitType, count) {
   // 皇帝直接征兵
   if (myRole === 'emperor') {
     doRecruit(unitType, count, myPlayerId, myCountryId);
+    AudioManager.playSuccess();
     addSystemChat('country', `皇帝征召了${formatNumber(count)}名${unit.name}`);
   } else {
     // 丞相需要审批
@@ -7920,6 +8230,25 @@ function handleBattleStart(data) {
 }
 
 function showBattleEffect(x, y) {
+  // 战斗爆炸音效
+  if (AudioManager.sfxEnabled && AudioManager.audioCtx) {
+    try {
+      const ctx = AudioManager.audioCtx;
+      const t = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(150, t);
+      osc.frequency.exponentialRampToValueAtTime(40, t + 0.3);
+      gain.gain.setValueAtTime(AudioManager.masterVolume * 0.15, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+      osc.start(t);
+      osc.stop(t + 0.3);
+    } catch(e) {}
+  }
+
   const overlay = document.getElementById('battle-overlay');
   const mapEl = document.getElementById('game-map');
   const mapRect = mapEl.getBoundingClientRect();
@@ -8232,6 +8561,7 @@ function confirmRebel() {
   publish(CHANNELS.STATE, { type: 'player_join', player });
   
   closeModal('modal-rebel');
+  AudioManager.playSuccess();
   refreshAllUI();
   renderMap();
   
@@ -8727,16 +9057,6 @@ function escapeHtml(text) {
 
 function sendChatMessage() {
   if (isSpectator) return;
-
-  // 聊天冷却检查
-  const now = Date.now();
-  if (now - lastChatTime < CHAT_COOLDOWN_MS) {
-    const remain = Math.ceil((CHAT_COOLDOWN_MS - (now - lastChatTime)) / 1000);
-    alert('作者服务器不够用了..资金不够 用的是免费\n请 ' + remain + ' 秒后再发消息');
-    return;
-  }
-  lastChatTime = now;
-
   const input = document.getElementById('chat-input');
   const text = input.value.trim();
   if (!text) return;
