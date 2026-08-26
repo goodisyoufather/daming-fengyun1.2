@@ -2795,6 +2795,27 @@ function deepMerge(target, source) {
   return result;
 }
 
+// 全量清洗状态中的玩家名/国家名（防御 XSS：任何来源的名字进库前都消毒）
+function sanitizeStateNames() {
+  try {
+    Object.values(gameState.players || {}).forEach(p => {
+      if (p && p.name) p.name = sanitizeName(p.name, 12);
+    });
+    Object.values(gameState.countries || {}).forEach(c => {
+      if (c && c.name) c.name = sanitizeName(c.name, 12);
+    });
+    // 聊天内容截断（防止超大 payload 刷屏/滥用）
+    const truncateMsg = (m) => {
+      if (m) m.content = String(m.content || '').slice(0, 500);
+    };
+    if (gameState.chat) {
+      (gameState.chat.world || []).forEach(truncateMsg);
+      Object.values(gameState.chat.country || {}).forEach(list => (list || []).forEach(truncateMsg));
+      Object.values(gameState.meetings || {}).forEach(meet => (meet.messages || []).forEach(truncateMsg));
+    }
+  } catch (e) {}
+}
+
 // 智能合并游戏状态（避免覆盖本地玩家数据）
 function mergeGameState(incoming) {
   if (!incoming || typeof incoming !== 'object') return;
@@ -2854,6 +2875,9 @@ function mergeGameState(incoming) {
 
   // 身份校准：防止状态合并后出现"一国有两君"
   try { reconcileMyRole(); } catch (e) {}
+
+  // 防御 XSS：清洗合并进来的玩家名/国家名
+  sanitizeStateNames();
 }
 
 // ============ 权威状态合并（来自后端） ============
@@ -2915,6 +2939,9 @@ function mergeGameStateFromServer(serverState) {
 
   // 身份校准：防止权威状态覆盖后出现"一国有两君"
   try { reconcileMyRole(); } catch (e) {}
+
+  // 防御 XSS：清洗服务器权威状态中的玩家名/国家名
+  sanitizeStateNames();
 }
 
 // localStorage 跨标签页同步（BroadcastChannel 的补充/降级）
@@ -4297,7 +4324,10 @@ function handleStateUpdate(data) {
   // 处理增量状态更新
   switch (data.type) {
     case 'player_join':
-      gameState.players[data.player.id] = data.player;
+      if (data.player) {
+        if (data.player.name) data.player.name = sanitizeName(data.player.name, 12);
+        gameState.players[data.player.id] = data.player;
+      }
       // 更新对应国家的职位信息
       const pCountry = gameState.countries[data.player.countryId];
       if (pCountry) {
@@ -4320,6 +4350,7 @@ function handleStateUpdate(data) {
       updateOnlineCount();
       break;
     case 'country_update':
+      if (data.country && data.country.name) data.country.name = sanitizeName(data.country.name, 12);
       gameState.countries[data.country.id] = data.country;
       refreshResourcePanel();
       break;
@@ -4549,7 +4580,10 @@ function handleStateUpdate(data) {
       handleThroneClaim(data);
       break;
     case 'player_update':
-      if (data.player && data.player.id) gameState.players[data.player.id] = data.player;
+      if (data.player && data.player.id) {
+        if (data.player.name) data.player.name = sanitizeName(data.player.name, 12);
+        gameState.players[data.player.id] = data.player;
+      }
       if (data.player && data.player.id === myPlayerId) myRole = data.player.role;
       try { reconcileMyRole(); } catch (e) {}
       refreshTopBar();
@@ -5777,7 +5811,11 @@ function startGame() {
       AudioManager.playError();
       throw new Error('请输入玩家姓名');
     }
-    playerName = nameInput;
+    playerName = sanitizeName(nameInput, 12);
+    if (!playerName) {
+      AudioManager.playError();
+      throw new Error('姓名包含非法字符，请更换');
+    }
     
     // 玩家姓名重复检测
     const nameExists = Object.values(gameState.players).some(
@@ -5828,10 +5866,10 @@ function startGame() {
     playerName = nameInput; // 保存到全局
     
     if (loginMode === 'new') {
-      const countryName = document.getElementById('country-name').value.trim();
+      const countryName = sanitizeName(document.getElementById('country-name').value.trim(), 12);
       if (!countryName) {
         AudioManager.playError();
-      throw new Error('请输入国家名称');
+      throw new Error('国家名称包含非法字符，请更换');
       }
       
       // 国家名称重复检测
@@ -9413,9 +9451,9 @@ function renderChatMessages() {
     const div = document.createElement('div');
     div.className = 'chat-msg ' + (msg.type || '');
     div.innerHTML = `
-      <span class="sender">${msg.sender}</span>
+      <span class="sender">${escapeHtml(msg.sender)}</span>
       <span class="content">${escapeHtml(msg.content)}</span>
-      <span class="time">${msg.time}</span>
+      <span class="time">${escapeHtml(msg.time)}</span>
     `;
     container.appendChild(div);
   });
@@ -9425,8 +9463,17 @@ function renderChatMessages() {
 
 function escapeHtml(text) {
   const div = document.createElement('div');
-  div.textContent = text;
+  div.textContent = text == null ? '' : text;
   return div.innerHTML;
+}
+
+// 名字/文本消毒：去除可用于 HTML/脚本注入的字符，限制长度（从源头掐断 XSS）
+function sanitizeName(str, maxLen) {
+  if (str == null) return '';
+  str = String(str).trim();
+  if (maxLen > 0 && str.length > maxLen) str = str.slice(0, maxLen);
+  // 去掉 < > " ' ` （& 保留，交给 escapeHtml 在输出时转义）
+  return str.replace(/[<>"'`]/g, '');
 }
 
 function sendChatMessage() {
