@@ -1418,8 +1418,148 @@
   #game-map.intro-zoom {
     transition: transform 2.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
+
+  /* ===== 悬浮窗层（右上角通知 / 交互弹窗） ===== */
+  #float-layer {
+    position: fixed;
+    top: 70px;
+    right: 14px;
+    width: 320px;
+    max-width: 92vw;
+    z-index: 1500;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: none;
+  }
+  .float-win {
+    pointer-events: auto;
+    background: var(--bg-1);
+    border: 3px solid var(--border-dark);
+    box-shadow: 4px 4px 0 rgba(0,0,0,0.5), inset 1px 1px 0 var(--border-light);
+    animation: floatIn 0.25s ease;
+  }
+  @keyframes floatIn {
+    from { opacity: 0; transform: translateX(30px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  .float-win .fw-head {
+    background: linear-gradient(180deg, var(--gold-0), var(--gold-1));
+    color: #1a1208;
+    padding: 7px 12px;
+    font-size: 13px;
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid var(--border-dark);
+  }
+  .float-win .fw-head .fw-close {
+    cursor: pointer;
+    width: 18px; height: 18px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--bg-2);
+    border: 1px solid var(--border-dark);
+    font-size: 12px;
+    line-height: 1;
+  }
+  .float-win .fw-head .fw-close:hover { background: var(--bg-0); }
+  .float-win .fw-body {
+    padding: 10px 12px;
+    font-size: 13px;
+    color: var(--text-0);
+    line-height: 1.7;
+  }
+  .float-win .fw-btns {
+    display: flex;
+    gap: 8px;
+    padding: 0 12px 12px;
+    justify-content: flex-end;
+  }
+  .float-win.warn .fw-head { background: linear-gradient(180deg, #c24a4a, #8b2e2e); color: #fff; }
+  .float-win.gold .fw-head { background: linear-gradient(180deg, var(--gold-0), var(--gold-1)); color: #1a1208; }
+
+  /* ===== 皇上属性面板（悬浮 HUD） ===== */
+  #emperor-life-panel {
+    position: fixed;
+    top: 70px;
+    left: 234px;
+    width: 230px;
+    background: rgba(26,18,8,0.92);
+    border: 3px solid var(--border-dark);
+    box-shadow: 4px 4px 0 rgba(0,0,0,0.5), inset 1px 1px 0 var(--border-light);
+    z-index: 1490;
+    padding: 10px 12px;
+    font-size: 12px;
+    display: none;
+    pointer-events: none;
+  }
+  #emperor-life-panel .elp-title {
+    color: var(--gold-1);
+    font-size: 13px;
+    font-weight: bold;
+    margin-bottom: 8px;
+    text-shadow: 1px 1px 0 #000;
+    display: flex;
+    justify-content: space-between;
+  }
+  #emperor-life-panel .elp-title .elp-dead { color: var(--red-1); }
+  .life-bar-row { margin-bottom: 7px; }
+  .life-bar-row .lb-label {
+    display: flex;
+    justify-content: space-between;
+    color: var(--text-1);
+    font-size: 11px;
+    margin-bottom: 3px;
+  }
+  .life-bar-row .lb-label .lb-val { color: var(--gold-1); font-family: 'Press Start 2P', monospace; font-size: 9px; }
+  .life-bar {
+    height: 10px;
+    background: #1a1208;
+    border: 2px solid var(--border-dark);
+    position: relative;
+  }
+  .life-bar .lb-fill {
+    height: 100%;
+    transition: width 0.4s;
+    background: linear-gradient(180deg, #5e9e5e, #3d6b3d);
+  }
+  .life-bar .lb-fill.water { background: linear-gradient(180deg, #4aa090, #2d6b5a); }
+  .life-bar .lb-fill.satisfaction { background: linear-gradient(180deg, #f0c75e, #b8892e); }
+  .life-bar .lb-fill.low { background: linear-gradient(180deg, #e07070, #8b2e2e); }
+
+  /* ===== 点菜弹窗 ===== */
+  .dining-tabs { display: flex; border-bottom: 3px solid var(--border-dark); background: var(--bg-2); margin-bottom: 10px; }
+  .dining-tab {
+    flex: 1; padding: 8px 4px; text-align: center; cursor: pointer;
+    font-size: 13px; color: var(--text-2); border-bottom: 3px solid transparent; margin-bottom: -3px;
+  }
+  .dining-tab.active { color: var(--gold-1); border-bottom-color: var(--gold-0); background: var(--bg-1); }
+  .dining-list { max-height: 46vh; overflow-y: auto; }
+  .dining-item {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--bg-1); border: 2px solid var(--border-dark);
+    padding: 6px 8px; margin-bottom: 6px; font-size: 12px;
+  }
+  .dining-item .d-name { flex: 1; color: var(--gold-1); }
+  .dining-item .d-price { color: var(--gold-0); font-family: 'Press Start 2P', monospace; font-size: 9px; white-space: nowrap; }
+  .dining-item .d-effect { color: var(--text-2); font-size: 10px; white-space: nowrap; }
+  .dining-item .d-add {
+    min-width: 58px; text-align: center; padding: 3px 6px; font-size: 11px;
+  }
+  .dining-cart {
+    border-top: 3px solid var(--border-dark);
+    padding: 10px;
+    background: var(--bg-1);
+    max-height: 22vh; overflow-y: auto;
+  }
+  .dining-cart .dc-title { color: var(--gold-1); font-size: 12px; margin-bottom: 6px; }
+  .dining-cart .dc-row { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-1); margin-bottom: 3px; }
+  .dining-cart .dc-row .dc-qty { color: var(--gold-1); }
+  .dining-cart .dc-total { border-top: 2px dashed var(--bg-3); margin-top: 6px; padding-top: 6px; font-size: 13px; }
+  .dining-cart .dc-total .price { color: var(--gold-1); font-family: 'Press Start 2P', monospace; font-size: 11px; }
+
 </style>
-<base target="_blank">
 <base target="_blank">
 <base target="_blank">
 <base target="_blank">
@@ -1562,6 +1702,10 @@
     </button>
     <button class="pixel-btn notif-btn" id="btn-sfx-toggle" title="切换音效" style="font-size:11px;padding:4px 8px;">🔊 音效</button>
     <button class="pixel-btn notif-btn" id="btn-bgm-toggle" title="切换背景音乐" style="font-size:11px;padding:4px 8px;">🎵 音乐</button>
+    <label class="vol-wrap" title="音量大小" style="display:inline-flex;align-items:center;gap:4px;margin-left:6px;background:rgba(0,0,0,0.35);border:2px solid rgba(212,168,67,0.4);border-radius:4px;padding:3px 6px;">
+      <span style="font-size:11px;color:var(--text-1);">🔉</span>
+      <input type="range" id="vol-slider" min="0" max="100" value="50" step="1" style="width:64px;height:14px;accent-color:#d4a843;cursor:pointer;margin:0;">
+    </label>
     <div class="online-count" id="online-count">在线: 0/250</div>
   </div>
 
@@ -1650,6 +1794,7 @@
             <button class="pixel-btn green" id="btn-field-build">🌾 空地建</button>
             <button class="pixel-btn" id="btn-diplomacy">🤝 外交</button>
             <button class="pixel-btn" id="btn-meeting">📜 会议</button>
+            <button class="pixel-btn gold" id="btn-life">🍽️ 点菜</button>
             <button class="pixel-btn red full-width" id="btn-rebel">⚑ 起兵起义</button>
           </div>
           <div style="margin-top:10px;font-size:11px;color:var(--text-2);line-height:1.5; border-top:1px dashed var(--bg-3); padding-top:8px;">
@@ -2075,17 +2220,18 @@ const PUSHER_CONFIG = {
 // ⚠️ 请将《精卫》音频文件放到服务器目录，或替换为有效URL
 // 支持格式: mp3, ogg, wav
 const BGM_CONFIG = {
-  // 主链接：放在服务器同级 bgm 目录下
-  url: './bgm/jingwei.mp3',
-  // 备用链接（CDN或外部链接）
-  fallbackUrl: '',
+  // 背景音乐播放列表：多首自动轮流播放（一首播完自动切下一首，循环）
+  playlist: [
+    { name: '精卫·曲目1', url: 'https://m701.music.126.net/20260826102122/d85172c6c2919da796e067f8129bd2ce/jdymusic/obj/wo3DlMOGwrbDjj7DisKw/79753581535/411e/b0da/4731/2ff6221d75c494db8a584eccd2e40493.mp3?vuutv=YxLBvCoIo/1WbMnOMxp8l1rqCvYo6GMIEwbbPBUaRoSb5CifQmXGiBB8zCMSwmDCn1xQaxgidortihbnsby+oSYDW7A0lETgYOULcjX5MrRBX3t3cy2iDwXoKeRmIJ6zP91IJuoI7GcE8VY1ZLYMXw==&cdntag=bWFyaz1vc193ZWIscXVhbGl0eV9zdGFuZGFyZA' },
+    { name: '精卫·曲目2', url: 'https://m801.music.126.net/20260826102216/8dbc640276bf124e1830c6fbff1fe8f7/jdymusic/obj/wo3DlMOGwrbDjj7DisKw/79798567816/38c3/90ed/8ab8/5d1bd3bfb591fba5d007c11a311ae9fa.mp3?vuutv=TK2McBcWtjGZlJEMGj6hACgMNJXb7sHMO1PTQF/fcUP647SeenzYIKQ+Wxn8Y99gXHJpwHl4uo4UNZy9gpil/gKanxEeGOwD9VdQigigHETcIi5Hm9NrJv/nqsZbXGiwKEsmDQktaBvO/a8/Fsiugg==&cdntag=bWFyaz1vc193ZWIscXVhbGl0eV9zdGFuZGFyZA' }
+  ],
   // 是否自动播放（浏览器策略可能需要用户交互后才能播放）
   autoplay: true
 };
 
 // 音效文件配置
 const SFX_CONFIG = {
-  click: './mouse-click-sound.mp3',   // 按钮点击音
+  click: './yinyue/mouse-click-sound.mp3',   // 按钮点击音（用户提供的鼠标音效）
   success: '',  // 成功音效（留空使用合成音）
   error: ''     // 错误音效（留空使用合成音）
 };
@@ -2111,15 +2257,17 @@ const AudioManager = {
       }
     } catch(e) {}
 
-    // 初始化 BGM Audio 对象
+    // 初始化 BGM Audio 对象（不循环：播放完自动切下一首实现轮流播放）
     this.bgm = new Audio();
-    this.bgm.loop = true;
+    this.bgm.loop = false;
     this.bgm.volume = this.masterVolume * 0.35;
+    this.bgmList = (BGM_CONFIG.playlist && BGM_CONFIG.playlist.length) ? BGM_CONFIG.playlist : [];
+    this.bgmIndex = 0;
 
     // 预加载点击音效（使用真实音频文件）
     if (SFX_CONFIG.click) {
       this.clickSound = new Audio(SFX_CONFIG.click);
-      this.clickSound.volume = this.masterVolume * 0.4;
+      this.clickSound.volume = this.masterVolume * 0.6;
       this.clickSound.preload = 'auto';
     }
 
@@ -2130,23 +2278,74 @@ const AudioManager = {
       console.warn('[Audio] Web Audio API 不支持，合成音效将不可用');
     }
 
-    // 全局按钮点击音效（事件委托）
+    // 全局按钮点击音效（事件委托）——除地图外，每次点击按钮都触发鼠标音效
+    const _isMapArea = (el) => !!el && typeof el.closest === 'function' &&
+      (!!el.closest('#game-map') || !!el.closest('.map-container'));
     document.addEventListener('click', (e) => {
-      const btn = e.target.closest('.pixel-btn');
+      if (!e.target || typeof e.target.closest !== 'function') return;
+      if (_isMapArea(e.target)) return; // 地图点击不触发音效
+      const btn = e.target.closest('button') || e.target.closest('.pixel-btn') ||
+                  e.target.closest('.role-option') || e.target.closest('.chat-tab') ||
+                  e.target.closest('.meeting-item') || e.target.closest('.building-card') ||
+                  e.target.closest('.unit-card') || e.target.closest('[onclick]');
       if (btn && !btn.disabled) {
         this.playClick();
       }
     });
 
-    // 全局触摸反馈音效
+    // 全局触摸反馈音效（移动端同样触发，排除地图）
     document.addEventListener('touchstart', (e) => {
-      const btn = e.target.closest('.pixel-btn');
+      if (!e.target || typeof e.target.closest !== 'function') return;
+      if (_isMapArea(e.target)) return;
+      const btn = e.target.closest('button') || e.target.closest('.pixel-btn') ||
+                  e.target.closest('.role-option') || e.target.closest('.chat-tab') ||
+                  e.target.closest('.meeting-item') || e.target.closest('.building-card') ||
+                  e.target.closest('.unit-card') || e.target.closest('[onclick]');
       if (btn && !btn.disabled) {
         this.playClick();
       }
     }, { passive: true });
 
+    // 首次交互解锁音频：解决浏览器自动播放策略导致第一次点击无声音
+    const _unlockAudio = () => {
+      try {
+        if (this.audioCtx && this.audioCtx.state === 'suspended') this.audioCtx.resume();
+      } catch(e) {}
+      if (this.clickSound) {
+        try {
+          const _v = this.clickSound.volume;
+          this.clickSound.volume = 0.0001;
+          this.clickSound.currentTime = 0;
+          this.clickSound.play().then(() => {
+            this.clickSound.pause();
+            this.clickSound.currentTime = 0;
+            this.clickSound.volume = _v;
+          }).catch(() => { this.clickSound.volume = _v; });
+        } catch(e) {}
+      }
+      document.removeEventListener('pointerdown', _unlockAudio);
+      document.removeEventListener('keydown', _unlockAudio);
+    };
+    document.addEventListener('pointerdown', _unlockAudio);
+    document.addEventListener('keydown', _unlockAudio);
+
     this.updateUI();
+
+    // 绑定音效/音乐开关按钮（此前未接线，点击无效）
+    const _sfxBtn = document.getElementById('btn-sfx-toggle');
+    if (_sfxBtn) _sfxBtn.onclick = () => this.toggleSFX();
+    const _bgmBtn = document.getElementById('btn-bgm-toggle');
+    if (_bgmBtn) _bgmBtn.onclick = () => this.toggleBGM();
+
+    // 音量滑块：拖动实时调节背景音乐与音效音量
+    const _volSlider = document.getElementById('vol-slider');
+    if (_volSlider) {
+      _volSlider.value = Math.round(this.masterVolume * 100);
+      _volSlider.addEventListener('input', () => {
+        this.setVolume(Number(_volSlider.value) / 100);
+      });
+    }
+
     console.log('[Audio] 音效系统初始化完成');
   },
 
@@ -2158,7 +2357,7 @@ const AudioManager = {
     if (this.clickSound) {
       try {
         this.clickSound.currentTime = 0;
-        this.clickSound.volume = this.masterVolume * 0.4;
+        this.clickSound.volume = this.masterVolume * 0.6;
         this.clickSound.play().catch(() => {
           // 播放失败时回退到合成音
           this._playSynthClick();
@@ -2254,17 +2453,30 @@ const AudioManager = {
   // 播放背景音乐
   playBGM(url) {
     if (!this.bgm || !this.bgmEnabled) return;
-    if (!url) {
+    let src = url;
+    let trackName = '';
+    // 未指定 URL 时，从播放列表取当前曲目（轮流播放）
+    if (!src && this.bgmList && this.bgmList.length > 0) {
+      const item = this.bgmList[this.bgmIndex % this.bgmList.length];
+      if (item) { src = item.url; trackName = item.name || ''; }
+    }
+    if (!src) {
       console.log('[Audio] BGM URL 未设置，跳过播放');
       return;
     }
-    this.bgm.src = url;
+    this.bgm.src = src;
     this.bgm.volume = this.masterVolume * 0.35;
     this.bgmStarted = true;
 
+    // 播放完自动切换下一首（轮流播放，循环）
+    this.bgm.onended = () => { this.nextBGM(); };
+    this.bgm.onerror = () => {
+      console.warn('[Audio] BGM 播放出错，尝试下一首:', trackName || src);
+    };
+
     const tryPlay = () => {
       this.bgm.play().then(() => {
-        console.log('[Audio] BGM 开始播放');
+        console.log('[Audio] BGM 开始播放:', trackName || 'direct url');
       }).catch(err => {
         console.log('[Audio] BGM 自动播放被阻止，等待用户交互...');
         // 浏览器自动播放策略：等待第一次用户点击
@@ -2282,6 +2494,15 @@ const AudioManager = {
 
     // 延迟一点播放，避免与页面加载冲突
     setTimeout(tryPlay, 300);
+  },
+
+  // 切到下一首背景音乐（轮流播放）
+  nextBGM() {
+    if (!this.bgmEnabled) return;
+    if (this.bgmList && this.bgmList.length > 1) {
+      this.bgmIndex = (this.bgmIndex + 1) % this.bgmList.length;
+    }
+    this.playBGM();
   },
 
   stopBGM() {
@@ -2306,8 +2527,8 @@ const AudioManager = {
     if (this.bgmEnabled) {
       if (this.bgm && this.bgm.src) {
         this.bgm.play().catch(() => {});
-      } else if (BGM_CONFIG.url) {
-        this.playBGM(BGM_CONFIG.url);
+      } else if (this.bgmList && this.bgmList.length > 0) {
+        this.playBGM();
       }
     } else {
       this.stopBGM();
@@ -2320,8 +2541,11 @@ const AudioManager = {
   setVolume(v) {
     this.masterVolume = Math.max(0, Math.min(1, v));
     if (this.bgm) this.bgm.volume = this.masterVolume * 0.35;
-    if (this.clickSound) this.clickSound.volume = this.masterVolume * 0.4;
+    if (this.clickSound) this.clickSound.volume = this.masterVolume * 0.6;
     this.save();
+    // 同步音量滑块显示
+    const _vol = document.getElementById('vol-slider');
+    if (_vol) _vol.value = Math.round(this.masterVolume * 100);
   },
 
   save() {
@@ -2346,6 +2570,8 @@ const AudioManager = {
       bgmBtn.title = this.bgmEnabled ? '音乐已开启，点击关闭' : '音乐已关闭，点击开启';
       bgmBtn.style.opacity = this.bgmEnabled ? '1' : '0.4';
     }
+    const _vol = document.getElementById('vol-slider');
+    if (_vol) _vol.value = Math.round(this.masterVolume * 100);
   }
 };
 
@@ -2625,6 +2851,9 @@ function mergeGameState(incoming) {
   if (gameState.players[myPlayerId]) {
     gameState.players[myPlayerId].online = true;
   }
+
+  // 身份校准：防止状态合并后出现"一国有两君"
+  try { reconcileMyRole(); } catch (e) {}
 }
 
 // ============ 权威状态合并（来自后端） ============
@@ -2683,6 +2912,9 @@ function mergeGameStateFromServer(serverState) {
   if (gameState.players[myPlayerId]) {
     gameState.players[myPlayerId].online = true;
   }
+
+  // 身份校准：防止权威状态覆盖后出现"一国有两君"
+  try { reconcileMyRole(); } catch (e) {}
 }
 
 // localStorage 跨标签页同步（BroadcastChannel 的补充/降级）
@@ -4177,6 +4409,13 @@ function handleStateUpdate(data) {
       if (data.requesterId === myPlayerId) {
         const statusText = data.approved ? '已批准' : '已拒绝';
         addSystemChat('country', `你的征兵请求被皇帝${statusText}`);
+        if (data.approved) {
+          AudioManager.playSuccess();
+          showFloatWindow({ id: 'recruit-result', title: '⚔️ 征兵请求', body: '皇上批准了你的征兵请求！', ttl: 5000 });
+        } else {
+          AudioManager.playError();
+          showFloatWindow({ id: 'recruit-result', title: '⚔️ 征兵请求', cls: 'warn', body: '皇上拒绝了你的征兵请求', ttl: 5000 });
+        }
       }
       if (data.countryId === myCountryId) {
         // 更新本地审批列表
@@ -4216,12 +4455,15 @@ function handleStateUpdate(data) {
     case 'diplomacy_request':
       if (data.request && data.request.id) {
         gameState.diplomacyRequests[data.request.id] = data.request;
-        // 如果是发给我的，通知一下
+        // 如果是发给我的，直接弹窗（结盟/议和）通知
         if (data.request.toCountryId === myCountryId && myRole === 'emperor') {
           const fromCountry = gameState.countries[data.request.fromCountryId];
           const typeText = { ally: '结盟', peace: '议和', trade: '贸易' }[data.request.type] || data.request.type;
           if (fromCountry) {
-            addSystemChat('country', `📨 ${fromCountry.name} 发来${typeText}请求，请到外交面板查看`);
+            addSystemChat('country', `📨 ${fromCountry.name} 发来${typeText}请求`);
+            if (data.request.type === 'ally' || data.request.type === 'peace') {
+              showDiploRequestPopup(data.request);
+            }
           }
         }
       }
@@ -4291,6 +4533,27 @@ function handleStateUpdate(data) {
     case 'queue_update':
       gameState.queues = data.queues || [];
       updateQueueFloat();
+      break;
+
+    // ===== 皇上体验生活：属性同步 / 驾崩 / 抢位 =====
+    case 'emperor_life_update':
+      if (data.countryId && gameState.countries[data.countryId] && data.life) {
+        gameState.countries[data.countryId].emperorLife = data.life;
+        if (data.countryId === myCountryId) updateEmperorLifePanel();
+      }
+      break;
+    case 'emperor_death':
+      handleEmperorDeathEvent(data);
+      break;
+    case 'throne_claim':
+      handleThroneClaim(data);
+      break;
+    case 'player_update':
+      if (data.player && data.player.id) gameState.players[data.player.id] = data.player;
+      if (data.player && data.player.id === myPlayerId) myRole = data.player.role;
+      try { reconcileMyRole(); } catch (e) {}
+      refreshTopBar();
+      refreshMemberList();
       break;
   }
 }
@@ -4672,7 +4935,21 @@ function advanceTurnLocal() {
 
 // 每回合轮换 AI 执行主机，防止多客户端同时执行导致元朝重复出兵
 function getAIHostId() {
-  const onlineNonAI = Object.values(gameState.players).filter(p => p.online && !p.isAI);
+  // 收集在线且非AI的玩家；优先用 Pusher 实时在线成员过滤，
+  // 避免“幽灵在线”（已关页面但 online 标记未清除）的玩家被选中为 AI 主机，导致元朝不出兵
+  let onlineNonAI = Object.values(gameState.players).filter(p => p.online && !p.isAI);
+  try {
+    if (pusherChannel && pusherChannel.members && pusherChannel.members.members) {
+      const memberIds = new Set(Object.keys(pusherChannel.members.members || {}));
+      if (memberIds.size > 0) {
+        onlineNonAI = onlineNonAI.filter(p => memberIds.has(p.id) || p.id === myPlayerId);
+      }
+    }
+  } catch (e) {}
+  // 兜底：本地客户端一定能执行 AI，若不在候选列表则补进去
+  if (!onlineNonAI.some(p => p.id === myPlayerId)) {
+    onlineNonAI.push(gameState.players[myPlayerId] || { id: myPlayerId });
+  }
   if (onlineNonAI.length === 0) return myPlayerId;
   const ids = onlineNonAI.map(p => p.id).sort();
   return ids[(gameState.turn - 1) % ids.length];
@@ -4720,8 +4997,8 @@ function processAIturn() {
     gar.unitType = Object.entries(counts).sort((a,b)=>b[1]-a[1])[0][0];
   });
 
-  // === 2. 攻击玩家：20%概率全军出击 ===
-  if (Math.random() < 0.2) {
+  // === 2. 攻击玩家：AI_ATTACK_CHANCE（40%）概率全军出击 ===
+  if (Math.random() < AI_ATTACK_CHANCE) {
     // 找所有玩家国家（排除AI、农民起义军）
     const playerCountries = Object.values(gameState.countries).filter(
       c => !c.isAI && c.id !== AI_COUNTRY_ID && c.id !== 'country_peasant_rebels'
@@ -5215,6 +5492,8 @@ function initLoginScreen() {
     document.getElementById('btn-new-country').classList.remove('gold');
     document.getElementById('new-country-form').style.display = 'none';
     document.getElementById('join-country-form').style.display = 'block';
+    // 加入国家只能当丞相（同步默认高亮：左丞相），防止一国有两君
+    selectedRole = 'left_prime';
     refreshCountrySelect();
   };
   
@@ -5574,12 +5853,18 @@ function startGame() {
       if (!country) {
         throw new Error('国家不存在');
       }
-      // 检查职位是否可用
+      // 检查职位是否可用（加入模式不允许直接当君主，防止一国有两君）
+      if (selectedRole === 'emperor') {
+        selectedRole = country.leftPrimeId ? 'right_prime' : 'left_prime';
+      }
       if (selectedRole === 'left_prime' && country.leftPrimeId) {
         throw new Error('左丞相职位已被占用');
       }
       if (selectedRole === 'right_prime' && country.rightPrimeId) {
         throw new Error('右丞相职位已被占用');
+      }
+      if (!selectedRole) {
+        throw new Error('该国家职位已满，请选择其他国家');
       }
       joinCountry(playerName, countryId, selectedRole);
     }
@@ -5876,9 +6161,9 @@ function enterGame() {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('game-root').style.display = 'flex';
   
-  // 播放背景音乐（进入游戏后）
-  if (BGM_CONFIG.url) {
-    AudioManager.playBGM(BGM_CONFIG.url);
+  // 播放背景音乐（进入游戏后，播放列表自动轮流播放）
+  if (BGM_CONFIG.playlist && BGM_CONFIG.playlist.length > 0) {
+    AudioManager.playBGM();
   }
 
   // 观战模式处理
@@ -5979,6 +6264,19 @@ function enterGame() {
   try {
     addSystemChat('world', `欢迎来到元末风云！你是${getDisplayRole(myPlayerId, myCountryId)}，当前天下皆为大元领土，起义吧！`);
   } catch (e) { console.error(e); }
+
+  // 身份自愈：清理历史遗留的"一国有两君"并校准自己的角色
+  try {
+    cleanupEmperorRoles();
+    reconcileMyRole();
+  } catch (e) { console.error('身份校准失败:', e); }
+
+  // 启动皇上属性（饱食/满意/水分）循环
+  startEmperorLifeLoop();
+  try {
+    if (myCountryId) ensureEmperorLife(gameState.countries[myCountryId]);
+    updateEmperorLifePanel();
+  } catch (e) { console.error('皇上属性初始化失败:', e); }
   
   updateOnlineCount();
   updateConnStatusBC();
@@ -6803,8 +7101,15 @@ function selectArmy(armyId) {
     // 立即重绘以显示选中高亮
     renderMap();
   } else {
-    // 如果已选中己方军队，点击敌方军队发起进攻
+    // 如果已选中己方军队
     if (selectedArmyId && gameState.armies[selectedArmyId] && gameState.armies[selectedArmyId].ownerId === myPlayerId) {
+      const sel = gameState.armies[selectedArmyId];
+      // 点击的是友军（同国家，非同一支）→ 弹出合并确认
+      if (army.countryId && sel.countryId && army.countryId === sel.countryId && army.id !== sel.id) {
+        showMergeConfirm(sel, army);
+        return;
+      }
+      // 否则是敌方军队 → 发起进攻/进发
       moveArmy(selectedArmyId, army.x, army.y);
       document.getElementById('bottom-tip').textContent = '⚔️ 军队正在向敌军进发';
       selectedArmyId = null;
@@ -7303,6 +7608,70 @@ function exitGarrison(cityId) {
   addSystemChat('country', `军队从${city.name}出城`);
 }
 
+// ============ 军队合并：一支军队指挥到另一支，兵力合并 ============
+function showMergeConfirm(src, tgt) {
+  if (!src || !tgt) return;
+  if (src.inBattle || tgt.inBattle) {
+    alert('战斗中的军队无法合并！');
+    selectedArmyId = null;
+    renderMap();
+    return;
+  }
+  const srcTotal = getTotalUnits(src.id);
+  const tgtTotal = getTotalUnits(tgt.id);
+  if (srcTotal <= 0) return;
+  showFloatWindow({
+    id: 'merge-confirm',
+    title: '⚔️ 合并军队',
+    body: `将 <b style="color:#ffd76e;">${formatNumber(srcTotal)}</b> 兵并入目标军队（<b style="color:#ffd76e;">${formatNumber(tgtTotal)}</b> 兵），合并后共 <b style="color:#ffd76e;">${formatNumber(srcTotal + tgtTotal)}</b> 兵。<br>指挥的源军队将解散。`,
+    buttons: [
+      { text: '✓ 合并', cls: 'gold', onClick: () => {
+          closeFloatWindow('merge-confirm');
+          mergeArmy(src.id, tgt.id);
+        } },
+      { text: '取消', cls: '', onClick: () => {
+          closeFloatWindow('merge-confirm');
+          selectedArmyId = null;
+          renderMap();
+        } }
+    ]
+  });
+  selectedArmyId = null;
+  renderMap();
+}
+
+function mergeArmy(sourceId, targetId) {
+  const src = gameState.armies[sourceId];
+  const tgt = gameState.armies[targetId];
+  if (!src || !tgt || src.id === tgt.id) return;
+  if (src.countryId !== tgt.countryId) return;
+  if (src.inBattle || tgt.inBattle) return;
+
+  // 合并兵力
+  for (const t of Object.keys(src.units)) {
+    tgt.units[t] = (tgt.units[t] || 0) + (src.units[t] || 0);
+  }
+  // 重算兵种（按数量最多的兵种）
+  const counts = { infantry: tgt.units.infantry||0, cavalry: tgt.units.cavalry||0, archer: tgt.units.archer||0, artillery: tgt.units.artillery||0 };
+  tgt.unitType = Object.entries(counts).sort((a,b)=>b[1]-a[1])[0][0];
+  // 源军队若是驻军，清除城市驻军关联
+  if (src.garrisonCityId) {
+    const c = gameState.cities[src.garrisonCityId];
+    if (c && c.garrisonArmyId === src.id) {
+      c.garrisonArmyId = null;
+      publish(CHANNELS.STATE, { type: 'city_update', city: c });
+    }
+  }
+  delete gameState.armies[sourceId];
+  if (selectedArmyId === sourceId) selectedArmyId = null;
+  publish(CHANNELS.STATE, { type: 'army_delete', armyId: sourceId });
+  publish(CHANNELS.STATE, { type: 'army_update', army: tgt });
+  renderMap();
+  addSystemChat('country', `⚔️ 军队合并成功，现共${formatNumber(getTotalUnits(tgt.id))}兵`);
+  // 轻提示
+  document.getElementById('bottom-tip').textContent = '⚔️ 军队已合并，共' + formatNumber(getTotalUnits(tgt.id)) + '兵';
+}
+
 // ============ 空地建造城市 ============
 function buildCityAt(x, y) {
   const country = gameState.countries[myCountryId];
@@ -7668,31 +8037,17 @@ function recruitUnit(unitType, count) {
     AudioManager.playSuccess();
     addSystemChat('country', `皇帝征召了${formatNumber(count)}名${unit.name}`);
   } else {
-    // 丞相需要审批
-    const approval = {
-      id: genId('app'),
-      type: 'recruit',
-      requesterId: myPlayerId,
-      requesterName: gameState.players[myPlayerId].name,
-      unitType,
-      count,
-      cost: totalCost,
-      status: 'pending',
-      timestamp: Date.now()
-    };
-
-    if (!gameState.approvals[myCountryId]) {
-      gameState.approvals[myCountryId] = [];
+    // 丞相需要审批：先弹确认框「是否向皇上请求征兵？」
+    pendingRecruitRequest = { unitType, count };
+    const detailEl = document.getElementById('recruit-confirm-detail');
+    if (detailEl) {
+      detailEl.innerHTML = `
+        <div>兵种：${unit.icon} ${unit.name}</div>
+        <div>数量：${formatNumber(count)} 名</div>
+        <div>费用：💰${totalCost.gold} 🌾${totalCost.food}${totalCost.energy ? ' ⚡' + totalCost.energy : ''}</div>`;
     }
-    gameState.approvals[myCountryId].push(approval);
-
-    publish(CHANNELS.STATE, {
-      type: 'approval_new',
-      countryId: myCountryId,
-      approval
-    });
-
-    addSystemChat('country', `征兵请求已发送，等待皇帝审批...`);
+    AudioManager.playClick();
+    openModal('modal-recruit-confirm');
   }
 
   closeModal('modal-recruit');
@@ -8763,6 +9118,19 @@ function sendDiplomacyRequest(type, targetId, data) {
     alert('已经发送过请求，等待对方回应');
     return;
   }
+
+  // 【结盟冷却】15秒内只能发起一次结盟
+  if (type === 'ally') {
+    const lastAlly = myCountry.lastAllianceTime || 0;
+    const remain = ALLIANCE_COOLDOWN_MS - (Date.now() - lastAlly);
+    if (remain > 0) {
+      AudioManager.playError();
+      alert(`结盟过于频繁，请 ${Math.ceil(remain / 1000)} 秒后再试`);
+      return;
+    }
+    myCountry.lastAllianceTime = Date.now();
+    publish(CHANNELS.STATE, { type: 'country_update', country: myCountry });
+  }
   
   const req = {
     id: genId('diploreq'),
@@ -8966,6 +9334,12 @@ function addChatMessage(tab, msg) {
     if (!gameState.chat.world) gameState.chat.world = [];
     gameState.chat.world.push(msg);
     if (gameState.chat.world.length > 100) gameState.chat.world.shift();
+  } else if (tab === 'country') {
+    // 【修复】国家频道消息此前未写入本地记录，导致发送方（如丞相）看不到自己发的消息
+    if (!gameState.chat.country) gameState.chat.country = {};
+    if (!gameState.chat.country[myCountryId]) gameState.chat.country[myCountryId] = [];
+    gameState.chat.country[myCountryId].push(msg);
+    if (gameState.chat.country[myCountryId].length > 100) gameState.chat.country[myCountryId].shift();
   }
   
   if (currentChatTab === tab) {
@@ -9311,6 +9685,11 @@ function refreshTopBar() {
   document.getElementById('tax-slider').disabled = !hasRight(myRole, 'tax');
   document.getElementById('btn-notifications').style.display = (myRole === 'emperor') ? 'inline-block' : 'none';
   document.getElementById('btn-rebel').style.display = (myRole !== 'emperor') ? 'block' : 'none';
+  const lifeBtn = document.getElementById('btn-life');
+  if (lifeBtn) lifeBtn.style.display = (myRole === 'emperor') ? '' : 'none';
+  if (document.getElementById('emperor-life-panel')) {
+    updateEmperorLifePanel();
+  }
 }
 
 function refreshResourcePanel() {
@@ -10040,10 +10419,10 @@ function playIntroAnimation() {
 
   // 延迟 500ms 后开始显示文字（地图已经定位好）
   setTimeout(() => {
-    typewriter(textEl, '😂：大元暴政，百姓苦不堪言，这就是你的起义据点', 280, () => {
+    typewriter(textEl, '😂：大元暴政，百姓苦不堪言，这就是你的起义据点', 200, () => {
       // 文字显示完后停留 3.5 秒，然后显示第二段
       setTimeout(() => {
-        typewriter(textEl, '🤬：元军随时会杀过来，保护好百姓，推翻暴元！', 280, () => {
+        typewriter(textEl, '🤬：元军随时会杀过来，保护好百姓，推翻暴元！', 200, () => {
           // 第二段停留 3 秒后消失
           setTimeout(() => {
             overlay.classList.add('fade-out');
@@ -10218,6 +10597,9 @@ function initPanelCollapse() {
 
 // ============ 启动 ============
 document.addEventListener('DOMContentLoaded', () => {
+  // 初始化音效系统（必须最先启动，注册全局点击音效）
+  try { AudioManager.init(); } catch(e) { console.warn('[Audio] 音效初始化失败:', e); }
+
   // 初始化面板折叠
   initPanelCollapse();
 
@@ -10302,6 +10684,719 @@ function handleDiplomacyActionFromApproval(approval) {
   broadcastFullState();
 }
 
+// ============================================================
+// ===== 皇上体验生活：点菜系统 + 皇上属性（饱食/满意/水分）=====
+// ============================================================
+const EMPEROR_DECAY_MS = 40000;      // 每个指标每40秒降1点
+const EMPEROR_LIFE_WARN = 15;        // 低于15系统提示
+const ALLIANCE_COOLDOWN_MS = 15000;  // 结盟冷却15秒
+const MEALS_PER_TURN = 2;            // 每回合最多2餐
+const MAX_DISHES_PER_MEAL = 365;     // 一顿最多365道菜
+const MAX_DISH_REPEAT = 5;           // 每道菜限重复5次
+
+// 100道明朝菜品：[名称, 价格(两), 饱食, 满意, 水分]
+const MING_DISHES = [
+  ['小米粥',4,18,2,6],['白米粥',6,16,2,6],['腊八粥',25,25,6,8],['八宝粥',40,28,8,8],['绿豆粥',15,15,4,10],
+  ['肉末粥',30,30,8,8],['茯苓粥',50,26,10,6],['莲子粥',45,24,12,8],['馒头',8,22,3,2],['花卷',12,24,4,2],
+  ['烧饼',15,26,4,2],['油条',10,20,5,1],['炊饼',9,22,3,2],['春饼',20,25,8,3],['锅盔',18,27,5,2],
+  ['饽饽',14,23,4,2],['面条',18,28,6,6],['过桥面',60,34,10,8],['臊子面',45,32,9,7],['刀削面',35,31,8,7],
+  ['汤饼',22,27,6,6],['饺子',30,30,9,5],['馄饨',28,29,8,6],['元宵',20,24,10,5],['粽子',25,25,8,4],
+  ['米糕',20,23,7,3],['桂花糕',35,22,14,4],['千层糕',40,23,15,4],['绿豆糕',30,20,12,5],['枣泥酥',35,21,14,3],
+  ['腌萝卜',8,8,4,3],['凉拌黄瓜',12,9,6,8],['拍黄瓜',12,9,6,8],['凉拌木耳',15,10,7,5],['凉拌豆腐丝',15,11,6,4],
+  ['酱黄瓜',13,9,5,3],['拌藕片',16,10,7,5],['拌三丝',15,10,6,4],['皮蛋豆腐',25,14,10,6],['咸鸭蛋',12,12,6,2],
+  ['豆腐乳',10,10,5,2],['酱菜拼盘',22,12,8,3],['凉拌海带丝',16,10,7,5],['蒜泥白肉',35,22,12,3],['白切鸡',45,24,14,4],
+  ['红烧肉',60,35,18,4],['东坡肉',80,38,22,4],['梅菜扣肉',70,36,18,4],['回锅肉',55,34,16,4],['糖醋里脊',58,33,17,4],
+  ['红烧狮子头',65,35,18,5],['清蒸鲈鱼',120,33,24,10],['西湖醋鱼',110,32,22,10],['松鼠桂鱼',200,34,28,8],['糖醋鲤鱼',130,33,23,9],
+  ['油焖大虾',150,30,26,8],['白灼虾',120,28,24,8],['叫花鸡',90,34,20,5],['白切羊肉',85,35,20,4],['涮羊肉',100,36,22,8],
+  ['烤全羊',500,50,35,6],['烤鸭',150,36,26,5],['盐水鸭',100,33,20,5],['酱牛肉',80,34,18,4],['卤猪蹄',75,33,17,4],
+  ['酱肘子',90,35,19,4],['爆炒腰花',70,32,16,5],['宫保鸡丁',55,33,16,5],['鱼香肉丝',50,32,15,5],['麻婆豆腐',35,24,14,6],
+  ['蚂蚁上树',40,26,13,5],['京酱肉丝',55,32,15,4],['葱爆羊肉',65,34,17,5],['糖醋排骨',70,33,17,4],['铁锅炖鸡',85,35,18,6],
+  ['红烧甲鱼',300,36,30,8],['清炖鳖裙',350,34,32,10],['鹿肉脯',250,32,30,4],['野兔炖汤',150,30,24,8],['龙井虾仁',300,28,30,8],
+  ['蜜汁火腿',500,30,32,5],['人参鸡汤',5000,48,40,14],['鱼翅羹',80000,50,50,12],['佛跳墙',100000,55,58,14],['燕窝羹',120000,45,55,12],
+  ['鹿茸汤',150000,50,55,10],['熊掌',200000,60,60,10],['炒青菜',12,12,6,6],['地三鲜',25,18,8,6],['烧茄子',28,18,9,6],
+  ['醋溜白菜',15,13,7,6],['干煸豆角',25,17,8,6],['蒜蓉菜心',18,13,8,6],['金针菇汤',20,14,8,8],['冬瓜汤',15,12,7,10],
+  ['白菜豆腐汤',18,14,8,10],['紫菜蛋花汤',15,12,7,10],['玉米排骨汤',55,30,16,10],['老母鸡汤',100,35,20,12],['卤煮火烧',30,26,7,5]
+];
+
+// 15种饮水：[名称, 价格, 饱食, 满意, 水分]
+const MING_DRINKS = [
+  ['白开水',1,0,1,25],['清茶',5,0,5,20],['酸梅汤',15,0,8,20],['绿豆汤',18,0,7,22],['甘蔗汁',20,0,8,20],
+  ['西瓜汁',25,0,9,22],['茉莉花茶',25,0,9,18],['龙井茶',30,0,10,18],['碧螺春',35,0,11,18],['米酒',30,0,14,12],
+  ['黄酒',40,0,18,8],['女儿红',100,0,25,6],['竹叶青',120,0,28,6],['状元红',200,0,30,6],['御用桂花酿',1000,0,40,10]
+];
+
+// 5个推荐套餐（针对选择困难症）：{name, price, desc, effects}
+const MING_PACKAGES = [
+  { name:'百姓简餐', price:30, desc:'小米粥×2+白米粥+咸鸭蛋+清茶，平民亦能果腹',
+    effects:{ sat:75, satis:18, water:40 } },
+  { name:'官宦家宴', price:328, desc:'红烧肉+清蒸鲈鱼+桂花糕+女儿红+冬瓜汤，官场应酬之选',
+    effects:{ sat:135, satis:85, water:43 } },
+  { name:'文人雅集', price:215, desc:'西湖醋鱼+桂花糕+龙井茶+凉拌黄瓜+米酒，诗酒趁年华',
+    effects:{ sat:96, satis:62, water:44 } },
+  { name:'御膳全席', price:220000, desc:'佛跳墙+烤鸭+燕窝羹+龙井虾仁+御用桂花酿，天子之膳',
+    effects:{ sat:180, satis:190, water:58 } },
+  { name:'至尊国宴', price:500000, desc:'熊掌+鹿茸汤+燕窝羹+鱼翅羹+御用桂花酿，倾国之宴',
+    effects:{ sat:225, satis:260, water:58 } }
+];
+
+let diningCart = {};       // itemKey -> qty
+let diningTab = 'dishes';
+let pendingRecruitRequest = null;
+let _throneFloatShown = 0;
+const _floatWindows = {};
+const _seenDiploPopups = new Set();
+
+// ---------- 悬浮窗系统 ----------
+function showFloatWindow(opts) {
+  const id = opts.id || ('fw_' + Math.random().toString(36).substr(2, 6));
+  const layer = document.getElementById('float-layer');
+  if (!layer) return id;
+  closeFloatWindow(id);
+  const win = document.createElement('div');
+  win.className = 'float-win ' + (opts.cls || 'gold');
+  win.id = 'fw-' + id;
+  let btnsHtml = '';
+  if (opts.buttons && opts.buttons.length) {
+    btnsHtml = '<div class="fw-btns">' + opts.buttons.map((b, i) =>
+      `<button class="pixel-btn ${b.cls || ''} small" data-fwbtn="${i}">${b.text}</button>`
+    ).join('') + '</div>';
+  }
+  win.innerHTML = `
+    <div class="fw-head"><span>${opts.title || '提示'}</span><span class="fw-close" data-fwclose="1">✕</span></div>
+    <div class="fw-body">${opts.body || ''}</div>
+    ${btnsHtml}`;
+  if (opts.buttons && opts.buttons.length) {
+    win.querySelectorAll('[data-fwbtn]').forEach(btn => {
+      btn.onclick = () => { (opts.buttons[parseInt(btn.dataset.fwbtn)] || {}).onClick && opts.buttons[parseInt(btn.dataset.fwbtn)].onClick(); };
+    });
+  }
+  const closeBtn = win.querySelector('[data-fwclose]');
+  if (closeBtn) closeBtn.onclick = () => closeFloatWindow(id);
+  layer.appendChild(win);
+  _floatWindows[id] = win;
+  if (opts.ttl) setTimeout(() => closeFloatWindow(id), opts.ttl);
+  return id;
+}
+function closeFloatWindow(id) {
+  const win = _floatWindows[id];
+  if (win) { win.remove(); delete _floatWindows[id]; }
+}
+
+// ---------- 皇上属性引擎 ----------
+function ensureEmperorLife(country) {
+  if (!country || country.isAI) return null;
+  const em = country.emperorId && gameState.players ? gameState.players[country.emperorId] : null;
+  if (em && em.isAI) return null;
+  if (!country.emperorLife) {
+    country.emperorLife = {
+      satiety: 100, satietyTick: Date.now(),
+      satisfaction: 100, satisfactionTick: Date.now(),
+      water: 100, waterTick: Date.now(),
+      mealsThisTurn: 0, lastMealTurn: gameState.turn || 1,
+      died: false, diedAt: 0, deadEmperorId: null, warnedLow: false
+    };
+  }
+  return country.emperorLife;
+}
+function effLifeVal(country, key) {
+  const L = country.emperorLife;
+  if (!L) return 100;
+  const decay = Math.floor((Date.now() - (L[key + 'Tick'] || Date.now())) / EMPEROR_DECAY_MS);
+  return Math.max(0, Math.round((L[key] || 100) - decay));
+}
+function emperorLifeState(country) {
+  return {
+    satiety: effLifeVal(country, 'satiety'),
+    satisfaction: effLifeVal(country, 'satisfaction'),
+    water: effLifeVal(country, 'water')
+  };
+}
+
+// ===== 身份校准：修复"一国有两君" =====
+// 清理历史遗留的幽灵君主：凡角色为 emperor 但并非该国登记的君主者，一律纠正
+function cleanupEmperorRoles() {
+  try {
+    Object.values(gameState.countries || {}).forEach(c => {
+      if (!c.emperorId) return;
+      (c.players || []).forEach(pid => {
+        const p = gameState.players && gameState.players[pid];
+        if (!p || p.role !== 'emperor' || pid === c.emperorId) return;
+        // 幽灵君主 → 降为丞相（有空的丞相位），否则变平民
+        if (c.leftPrimeId === pid) p.role = 'left_prime';
+        else if (c.rightPrimeId === pid) p.role = 'right_prime';
+        else if (!c.leftPrimeId) { p.role = 'left_prime'; c.leftPrimeId = pid; }
+        else if (!c.rightPrimeId) { p.role = 'right_prime'; c.rightPrimeId = pid; }
+        else { p.role = null; p.countryId = null; }
+      });
+    });
+  } catch (e) { console.error('清理幽灵君主失败:', e); }
+}
+// 校准自己的角色：若本地认为自己是大君，但国家登记的大君是别人 → 自动降为丞相
+function reconcileMyRole() {
+  if (!myCountryId || !myPlayerId) return;
+  const country = gameState.countries[myCountryId];
+  const me = gameState.players && gameState.players[myPlayerId];
+  if (!country || !me) return;
+  if (country.emperorId && country.emperorId !== myPlayerId && me.role === 'emperor') {
+    let newRole = null;
+    if (country.leftPrimeId === myPlayerId) newRole = 'left_prime';
+    else if (country.rightPrimeId === myPlayerId) newRole = 'right_prime';
+    else if (!country.leftPrimeId) { newRole = 'left_prime'; country.leftPrimeId = myPlayerId; }
+    else if (!country.rightPrimeId) { newRole = 'right_prime'; country.rightPrimeId = myPlayerId; }
+    me.role = newRole;
+    if (!newRole) me.countryId = null;
+    myRole = newRole;
+    const roleName = newRole === 'left_prime' ? '左丞相' : newRole === 'right_prime' ? '右丞相' : '平民';
+    addSystemChat('country', `⚠️ 该国已有君主，你被降为${roleName}`);
+    refreshTopBar();
+    refreshMemberList();
+  }
+}
+
+let _emperorLifeTimer = null;
+function startEmperorLifeLoop() {
+  if (_emperorLifeTimer) return;
+  _emperorLifeTimer = setInterval(() => { try { emperorLifeTick(); } catch (e) {} }, 1000);
+}
+
+function emperorLifeTick() {
+  if (!myCountryId) return;
+  const country = gameState.countries[myCountryId];
+  if (!country || country.isAI) return;
+  const L = ensureEmperorLife(country);
+  if (!L) return;
+
+  // 懒重置每回合用餐次数
+  if (L.lastMealTurn !== (gameState.turn || 1)) {
+    L.mealsThisTurn = 0;
+    L.lastMealTurn = gameState.turn || 1;
+  }
+
+  const st = emperorLifeState(country);
+
+  // 死亡检测
+  if (!L.died && (st.satiety <= 0 || st.satisfaction <= 0 || st.water <= 0)) {
+    triggerEmperorDeath(country);
+    return;
+  }
+
+  // 低于15系统提示（仅提示一次）
+  if (!L.died && !L.warnedLow && (st.satiety < EMPEROR_LIFE_WARN || st.satisfaction < EMPEROR_LIFE_WARN || st.water < EMPEROR_LIFE_WARN)) {
+    L.warnedLow = true;
+    const which = [];
+    if (st.satiety < EMPEROR_LIFE_WARN) which.push('饱食度' + st.satiety);
+    if (st.satisfaction < EMPEROR_LIFE_WARN) which.push('满意度' + st.satisfaction);
+    if (st.water < EMPEROR_LIFE_WARN) which.push('水分值' + st.water);
+    addSystemChat('country', `⚠️ 皇上危矣！${which.join('、')} 已低于15，请速速用膳！`);
+    if (myRole === 'emperor') {
+      AudioManager.playError();
+      showFloatWindow({ id: 'emperor-warn', title: '⚠️ 皇上危矣', cls: 'warn', body: `${which.join('、')} 已低于15，请尽快点菜用膳！`, ttl: 5000 });
+    }
+  }
+
+  updateEmperorLifePanel();
+}
+
+// ---------- 驾崩 & 抢位 ----------
+function triggerEmperorDeath(country) {
+  const L = country.emperorLife;
+  if (!L || L.died) return;
+  L.died = true;
+  L.diedAt = Date.now();
+  L.deadEmperorId = country.emperorId;
+  const deadId = country.emperorId;
+  const deadName = deadId && gameState.players[deadId] ? gameState.players[deadId].name : '先帝';
+
+  // 死皇夺位（所有客户端统一处理）
+  if (deadId && gameState.players[deadId]) gameState.players[deadId].role = null;
+  if (deadId === myPlayerId) {
+    myRole = null;
+  }
+
+  country.emperorId = null; // 皇位空悬
+
+  publish(CHANNELS.STATE, {
+    type: 'emperor_death',
+    countryId: country.id,
+    deadEmperorId: deadId,
+    deadName: deadName,
+    timestamp: L.diedAt
+  });
+
+  handleEmperorDeathLocal(country, deadId, deadName);
+  refreshTopBar();
+  refreshMemberList();
+  refreshResourcePanel();
+  updateEmperorLifePanel();
+}
+
+function handleEmperorDeathLocal(country, deadId, deadName) {
+  const L = country.emperorLife;
+  if (!L) return;
+  const myCountry = gameState.countries[myCountryId];
+  if (!myCountry || myCountry.id !== country.id) return;
+
+  addSystemChat('country', `☠️ 皇上${deadName}驾崩了！皇位空悬，群臣蠢蠢欲动...`);
+
+  if (deadId === myPlayerId) {
+    AudioManager.playError();
+    showFloatWindow({ id: 'emperor-dead', title: '☠️ 你驾崩了', cls: 'warn', body: '你未能延续江山，皇位空悬，群臣争位……', ttl: 6000 });
+    return;
+  }
+
+  if ((myRole === 'left_prime' || myRole === 'right_prime') && _throneFloatShown !== L.diedAt) {
+    _throneFloatShown = L.diedAt;
+    AudioManager.playError();
+    showFloatWindow({
+      id: 'throne',
+      title: '☠️ 皇上驾崩了！',
+      cls: 'warn',
+      ttl: 0,
+      body: `<div style="font-size:14px;color:var(--gold-1);text-align:center;margin-bottom:6px;">先帝${deadName}驾崩</div><div style="color:var(--text-1);font-size:12px;text-align:center;">朝不可一日无君，是否抢位登基？</div>`,
+      buttons: [
+        { text: '不管', cls: '', onClick: () => closeFloatWindow('throne') },
+        { text: '👑 抢位', cls: 'gold', onClick: () => claimThrone() }
+      ]
+    });
+  }
+}
+
+function handleEmperorDeathEvent(data) {
+  if (!data || !data.countryId) return;
+  const country = gameState.countries[data.countryId];
+  if (!country) return;
+  const L = ensureEmperorLife(country);
+  if (!L) return;
+  if (!L.died) {
+    L.died = true;
+    L.diedAt = data.timestamp || Date.now();
+    L.deadEmperorId = data.deadEmperorId;
+    if (data.deadEmperorId && gameState.players[data.deadEmperorId]) gameState.players[data.deadEmperorId].role = null;
+    country.emperorId = null;
+    handleEmperorDeathLocal(country, data.deadEmperorId, data.deadName || '先帝');
+    refreshTopBar();
+    refreshMemberList();
+  } else if (country.id === myCountryId && (myRole === 'left_prime' || myRole === 'right_prime') && _throneFloatShown !== L.diedAt) {
+    _throneFloatShown = L.diedAt;
+    AudioManager.playError();
+    showFloatWindow({
+      id: 'throne',
+      title: '☠️ 皇上驾崩了！',
+      cls: 'warn',
+      ttl: 0,
+      body: `<div style="font-size:14px;color:var(--gold-1);text-align:center;margin-bottom:6px;">先帝${data.deadName || '驾崩'}</div><div style="color:var(--text-1);font-size:12px;text-align:center;">朝不可一日无君，是否抢位登基？</div>`,
+      buttons: [
+        { text: '不管', cls: '', onClick: () => closeFloatWindow('throne') },
+        { text: '👑 抢位', cls: 'gold', onClick: () => claimThrone() }
+      ]
+    });
+  }
+  updateEmperorLifePanel();
+}
+
+let _myThroneClaimAt = 0;
+function claimThrone() {
+  const country = gameState.countries[myCountryId];
+  if (!country) return;
+  const L = country.emperorLife;
+  if (!L || !L.died) { closeFloatWindow('throne'); return; }
+
+  // 皇位已被他人占据
+  if (country.emperorId) {
+    const winner = gameState.players[country.emperorId];
+    const winnerName = winner ? winner.name : '他人';
+    showFloatWindow({ id: 'throne-lost', title: '👑 抢位失败', cls: 'warn', body: `皇位被${winnerName}抢了！节哀😂`, ttl: 5000 });
+    closeFloatWindow('throne');
+    return;
+  }
+
+  _myThroneClaimAt = Date.now();
+  applyThroneClaim(myPlayerId, _myThroneClaimAt);
+  publish(CHANNELS.STATE, {
+    type: 'throne_claim',
+    countryId: myCountryId,
+    newEmperorId: myPlayerId,
+    newEmperorName: playerName,
+    claimedAt: _myThroneClaimAt
+  });
+  closeFloatWindow('throne');
+  showFloatWindow({ id: 'throne-ok', title: '👑 登基', body: '你已抢得皇位，登基为帝！', ttl: 4000 });
+}
+
+function applyThroneClaim(newEmperorId, claimedAt) {
+  const country = gameState.countries[myCountryId];
+  if (!country) return;
+  const oldEmperorId = country.emperorId;
+  if (oldEmperorId && gameState.players[oldEmperorId]) gameState.players[oldEmperorId].role = null;
+  if (country.leftPrimeId === newEmperorId) country.leftPrimeId = null;
+  if (country.rightPrimeId === newEmperorId) country.rightPrimeId = null;
+  country.emperorId = newEmperorId;
+  if (gameState.players[newEmperorId]) {
+    gameState.players[newEmperorId].role = 'emperor';
+    gameState.players[newEmperorId].online = true;
+  }
+  country.emperorLife = {
+    satiety: 100, satietyTick: Date.now(),
+    satisfaction: 100, satisfactionTick: Date.now(),
+    water: 100, waterTick: Date.now(),
+    mealsThisTurn: 0, lastMealTurn: gameState.turn || 1,
+    died: false, diedAt: 0, deadEmperorId: null, warnedLow: false
+  };
+  if (newEmperorId === myPlayerId) {
+    myRole = 'emperor';
+    addSystemChat('country', '👑 你已登基为帝，执掌天下！');
+  } else {
+    const nm = gameState.players[newEmperorId] ? gameState.players[newEmperorId].name : '新帝';
+    addSystemChat('world', `👑 ${country.name} 皇位易主，${nm} 登基为帝！`);
+  }
+  refreshTopBar();
+  refreshMemberList();
+  updateEmperorLifePanel();
+  publish(CHANNELS.STATE, { type: 'country_update', country: country });
+  if (gameState.players[newEmperorId]) {
+    publish(CHANNELS.STATE, { type: 'player_update', player: gameState.players[newEmperorId] });
+  }
+}
+
+function handleThroneClaim(data) {
+  if (!data || data.countryId !== myCountryId) return;
+  const country = gameState.countries[myCountryId];
+  if (!country) return;
+  const L = country.emperorLife;
+  if (!L || !L.died) return;
+
+  // 皇位空悬 → 应用抢位
+  if (!country.emperorId) {
+    applyThroneClaim(data.newEmperorId, data.claimedAt || Date.now());
+    closeFloatWindow('throne');
+    if (data.newEmperorId !== myPlayerId && (myRole === 'left_prime' || myRole === 'right_prime')) {
+      showFloatWindow({ id: 'throne-lost', title: '👑 抢位失败', cls: 'warn', body: `皇位被${data.newEmperorName || '他人'}抢了！节哀😂`, ttl: 5000 });
+    }
+    return;
+  }
+
+  // 皇位已有人：若我是持位者且对方声称更早 → 让位
+  if (country.emperorId === myPlayerId) {
+    const myAt = _myThroneClaimAt;
+    const theirAt = data.claimedAt || 0;
+    if (theirAt > 0 && (myAt === 0 || theirAt < myAt)) {
+      applyThroneClaim(data.newEmperorId, theirAt);
+      showFloatWindow({ id: 'throne-lost', title: '👑 抢位失败', cls: 'warn', body: `皇位被${data.newEmperorName || '他人'}抢了！节哀😂`, ttl: 5000 });
+    }
+  } else {
+    closeFloatWindow('throne');
+  }
+}
+
+// ---------- 点菜系统 ----------
+function openDining() {
+  if (myRole !== 'emperor') { AudioManager.playError(); alert('只有皇上可以点菜'); return; }
+  const country = gameState.countries[myCountryId];
+  const L = ensureEmperorLife(country);
+  if (!L) return;
+  if (L.died) { AudioManager.playError(); alert('先帝已驾崩，无法用膳'); return; }
+  diningCart = {};
+  diningTab = 'dishes';
+  const goldEl = document.getElementById('dining-gold');
+  if (goldEl) goldEl.textContent = Math.floor(country.resources.gold).toLocaleString();
+  document.querySelectorAll('.dining-tab').forEach(t => t.classList.toggle('active', t.dataset.dtab === 'dishes'));
+  updateDiningMealsLeft();
+  renderDiningList();
+  renderDiningCart();
+  openModal('modal-dining');
+}
+
+function updateDiningMealsLeft() {
+  const country = gameState.countries[myCountryId];
+  if (!country) return;
+  const L = country.emperorLife;
+  if (L && L.lastMealTurn !== (gameState.turn || 1)) { L.mealsThisTurn = 0; L.lastMealTurn = gameState.turn || 1; }
+  const used = L ? L.mealsThisTurn : 0;
+  const el = document.getElementById('dining-meals-left');
+  if (el) el.textContent = Math.max(0, MEALS_PER_TURN - used);
+}
+
+function findDiningItem(key) {
+  if (key[0] === 'd') {
+    const d = MING_DISHES[parseInt(key.slice(1))];
+    return d ? { name: d[0], price: d[1], sat: d[2], satis: d[3], water: d[4] } : null;
+  }
+  if (key[0] === 'w') {
+    const d = MING_DRINKS[parseInt(key.slice(1))];
+    return d ? { name: d[0], price: d[1], sat: d[2], satis: d[3], water: d[4] } : null;
+  }
+  if (key[0] === 'p') {
+    const p = MING_PACKAGES[parseInt(key.slice(1))];
+    return p ? { name: p.name, price: p.price, sat: p.effects.sat, satis: p.effects.satis, water: p.effects.water } : null;
+  }
+  return null;
+}
+
+function renderDiningList() {
+  const listEl = document.getElementById('dining-list');
+  if (!listEl) return;
+  listEl.innerHTML = '';
+  let items;
+  if (diningTab === 'dishes') {
+    items = MING_DISHES.map((d, i) => ({ key: 'd' + i, name: d[0], price: d[1], sat: d[2], satis: d[3], water: d[4], tag: '菜品' }));
+  } else if (diningTab === 'drinks') {
+    items = MING_DRINKS.map((d, i) => ({ key: 'w' + i, name: d[0], price: d[1], sat: d[2], satis: d[3], water: d[4], tag: '饮水' }));
+  } else {
+    items = MING_PACKAGES.map((p, i) => ({ key: 'p' + i, name: p.name, price: p.price, sat: p.effects.sat, satis: p.effects.satis, water: p.effects.water, tag: '套餐', desc: p.desc }));
+  }
+  items.forEach(it => {
+    const row = document.createElement('div');
+    row.className = 'dining-item';
+    const effectTxt = [];
+    if (it.sat) effectTxt.push('饱+' + it.sat);
+    if (it.satis) effectTxt.push('满+' + it.satis);
+    if (it.water) effectTxt.push('水+' + it.water);
+    const btn = (diningTab === 'packages')
+      ? `<button class="pixel-btn gold d-add" onclick="eatPackage('${it.key}')">享用</button>`
+      : `<button class="pixel-btn d-add" onclick="addToCart('${it.key}')">+ 加菜</button>`;
+    const qty = diningCart[it.key] || 0;
+    row.innerHTML = `
+      <div class="d-name">${it.tag === '套餐' ? '🎁 ' : ''}${it.name}${it.desc ? `<div style="font-size:10px;color:var(--text-2);">${it.desc}</div>` : ''}</div>
+      <div class="d-effect">${effectTxt.join(' ')}</div>
+      <div class="d-price">💰${it.price}</div>
+      ${qty > 0 ? `<span style="color:var(--green-1);font-size:11px;">×${qty}</span>` : ''}
+      ${btn}`;
+    listEl.appendChild(row);
+  });
+}
+
+function addToCart(key) {
+  const cur = diningCart[key] || 0;
+  if (cur >= MAX_DISH_REPEAT) { AudioManager.playError(); alert('每道菜限重复5次'); return; }
+  const total = Object.values(diningCart).reduce((s, v) => s + v, 0);
+  if (total >= MAX_DISHES_PER_MEAL) { AudioManager.playError(); alert(`一顿最多${MAX_DISHES_PER_MEAL}道菜`); return; }
+  diningCart[key] = cur + 1;
+  renderDiningList();
+  renderDiningCart();
+}
+
+function renderDiningCart() {
+  const rowsEl = document.getElementById('dc-rows');
+  const countEl = document.getElementById('dc-count');
+  const priceEl = document.getElementById('dc-total-price');
+  if (!rowsEl) return;
+  let totalCount = 0, totalPrice = 0;
+  rowsEl.innerHTML = '';
+  const entries = Object.entries(diningCart);
+  if (entries.length === 0) {
+    rowsEl.innerHTML = '<div style="color:var(--text-2);font-size:11px;">尚未点菜，选好菜品后一并开吃</div>';
+  } else {
+    entries.forEach(([key, qty]) => {
+      const item = findDiningItem(key);
+      if (!item) return;
+      totalCount += qty;
+      totalPrice += item.price * qty;
+      const row = document.createElement('div');
+      row.className = 'dc-row';
+      row.innerHTML = `<span>${item.name} × ${qty}</span><span class="dc-qty">💰${item.price * qty}</span>`;
+      rowsEl.appendChild(row);
+    });
+  }
+  if (countEl) countEl.textContent = totalCount;
+  if (priceEl) priceEl.textContent = totalPrice.toLocaleString();
+}
+
+function eatMeal() {
+  const country = gameState.countries[myCountryId];
+  const L = ensureEmperorLife(country);
+  if (!L) return;
+  if (myRole !== 'emperor') { AudioManager.playError(); alert('只有皇上可以用膳'); return; }
+  if (L.died) { AudioManager.playError(); alert('先帝已驾崩'); return; }
+  if (L.lastMealTurn !== (gameState.turn || 1)) { L.mealsThisTurn = 0; L.lastMealTurn = gameState.turn || 1; }
+  if (L.mealsThisTurn >= MEALS_PER_TURN) { AudioManager.playError(); alert(`本回合已用${MEALS_PER_TURN}餐，请下回合再用膳`); return; }
+
+  const entries = Object.entries(diningCart);
+  const totalCount = entries.reduce((s, [, v]) => s + v, 0);
+  if (totalCount === 0) { AudioManager.playError(); alert('请先点菜'); return; }
+
+  let totalPrice = 0, satGain = 0, satisGain = 0, waterGain = 0;
+  const dishNames = [];
+  entries.forEach(([key, qty]) => {
+    const item = findDiningItem(key);
+    if (!item) return;
+    totalPrice += item.price * qty;
+    satGain += item.sat * qty;
+    satisGain += item.satis * qty;
+    waterGain += item.water * qty;
+    dishNames.push(item.name + '×' + qty);
+  });
+
+  if (country.resources.gold < totalPrice) {
+    AudioManager.playError();
+    alert(`国库资金不足！本餐需 ${totalPrice} 两，当前国库 ${Math.floor(country.resources.gold)} 两`);
+    return;
+  }
+
+  // 扣国家经济（国库）
+  country.resources.gold = Math.max(0, country.resources.gold - totalPrice);
+
+  // 结算属性
+  const cur = emperorLifeState(country);
+  L.satiety = Math.min(100, cur.satiety + satGain); L.satietyTick = Date.now();
+  L.satisfaction = Math.min(100, cur.satisfaction + satisGain); L.satisfactionTick = Date.now();
+  L.water = Math.min(100, cur.water + waterGain); L.waterTick = Date.now();
+  L.mealsThisTurn++;
+  L.warnedLow = false;
+
+  // 仪式感
+  const nameList = dishNames.slice(0, 6).join('、') + (dishNames.length > 6 ? ` 等${totalCount}道` : '');
+  addSystemChat('country', `🍽️ 御膳房上膳！皇上享用了【${nameList}】，共耗国库 ${totalPrice} 两`);
+  addSystemChat('country', `🍚 饱食+${satGain} 😊满意+${satisGain} 💧水分+${waterGain}`);
+  AudioManager.playSuccess();
+  showFloatWindow({
+    id: 'dining-ceremony', title: '🍽️ 御膳进上',
+    body: `<div style="text-align:center;font-size:15px;color:var(--gold-1);margin-bottom:6px;">万岁，用膳了！</div><div style="font-size:12px;color:var(--text-1);line-height:1.8;">${nameList}</div><div style="text-align:center;color:var(--gold-0);margin-top:6px;">耗国库 ${totalPrice} 两</div>`,
+    ttl: 5000
+  });
+
+  diningCart = {};
+  publish(CHANNELS.STATE, { type: 'country_update', country: country });
+  publish(CHANNELS.STATE, { type: 'emperor_life_update', countryId: country.id, life: country.emperorLife });
+  updateEmperorLifePanel();
+  refreshResourcePanel();
+  renderDiningCart();
+  updateDiningMealsLeft();
+  closeModal('modal-dining');
+}
+
+function eatPackage(key) {
+  const p = MING_PACKAGES[parseInt(key.slice(1))];
+  if (!p) return;
+  const country = gameState.countries[myCountryId];
+  const L = ensureEmperorLife(country);
+  if (!L) return;
+  if (myRole !== 'emperor') { AudioManager.playError(); alert('只有皇上可以享用'); return; }
+  if (L.died) { AudioManager.playError(); alert('先帝已驾崩'); return; }
+  if (L.lastMealTurn !== (gameState.turn || 1)) { L.mealsThisTurn = 0; L.lastMealTurn = gameState.turn || 1; }
+  if (L.mealsThisTurn >= MEALS_PER_TURN) { AudioManager.playError(); alert('本回合用餐次数已用完'); return; }
+  if (country.resources.gold < p.price) { AudioManager.playError(); alert(`国库资金不足！套餐需 ${p.price} 两`); return; }
+
+  country.resources.gold -= p.price;
+  const cur = emperorLifeState(country);
+  L.satiety = Math.min(100, cur.satiety + p.effects.sat); L.satietyTick = Date.now();
+  L.satisfaction = Math.min(100, cur.satisfaction + p.effects.satis); L.satisfactionTick = Date.now();
+  L.water = Math.min(100, cur.water + p.effects.water); L.waterTick = Date.now();
+  L.mealsThisTurn++;
+  L.warnedLow = false;
+
+  addSystemChat('country', `🎁 皇上享用了【${p.name}】套餐，共耗国库 ${p.price} 两`);
+  AudioManager.playSuccess();
+  showFloatWindow({ id: 'dining-ceremony', title: '🎁 御膳进上', body: `<div style="text-align:center;font-size:15px;color:var(--gold-1);margin-bottom:6px;">万岁，用了【${p.name}】！</div><div style="text-align:center;color:var(--gold-0);">耗国库 ${p.price} 两</div>`, ttl: 4500 });
+
+  publish(CHANNELS.STATE, { type: 'country_update', country: country });
+  publish(CHANNELS.STATE, { type: 'emperor_life_update', countryId: country.id, life: country.emperorLife });
+  updateEmperorLifePanel();
+  refreshResourcePanel();
+  updateDiningMealsLeft();
+  closeModal('modal-dining');
+}
+
+// 皇上属性面板刷新
+function updateEmperorLifePanel() {
+  const panel = document.getElementById('emperor-life-panel');
+  if (!panel) return;
+  const country = gameState.countries[myCountryId];
+  if (!country || country.isAI || !country.emperorLife) { panel.style.display = 'none'; return; }
+  const L = country.emperorLife;
+  const st = emperorLifeState(country);
+  const em = country.emperorId && gameState.players[country.emperorId];
+  const titleEl = document.getElementById('elp-title-text');
+  if (titleEl) titleEl.textContent = em ? `👑 皇上：${em.name}` : '👑 皇上状态';
+  const deadEl = document.getElementById('elp-dead-text');
+  if (deadEl) deadEl.style.display = L.died ? 'inline' : 'none';
+
+  const setBar = (id, fillId, val, cls) => {
+    const el = document.getElementById(id);
+    const fill = document.getElementById(fillId);
+    if (el) el.textContent = val;
+    if (fill) {
+      fill.style.width = val + '%';
+      fill.className = 'lb-fill ' + cls + (val < EMPEROR_LIFE_WARN ? ' low' : '');
+    }
+  };
+  setBar('elp-satiety', 'elp-satiety-fill', st.satiety, '');
+  setBar('elp-satisfaction', 'elp-satisfaction-fill', st.satisfaction, 'satisfaction');
+  setBar('elp-water', 'elp-water-fill', st.water, 'water');
+
+  const tip = document.getElementById('elp-tip');
+  if (tip) {
+    if (L.died) {
+      tip.innerHTML = '☠️ 皇上已驾崩，皇位空悬';
+    } else {
+      const mealsLeft = Math.max(0, MEALS_PER_TURN - (L.lastMealTurn === (gameState.turn || 1) ? L.mealsThisTurn : 0));
+      tip.innerHTML = (myRole === 'emperor') ? `🍽️ 本回合可用餐 ${mealsLeft}/${MEALS_PER_TURN}` : '每40秒各项-1';
+    }
+  }
+  panel.style.display = 'block';
+}
+
+// ---------- 丞相征兵确认 ----------
+function confirmRecruitRequest() {
+  if (!pendingRecruitRequest) { closeModal('modal-recruit-confirm'); return; }
+  const { unitType, count } = pendingRecruitRequest;
+  pendingRecruitRequest = null;
+  const unit = UNIT_TYPES[unitType];
+  const country = gameState.countries[myCountryId];
+  const totalCost = {
+    gold: unit.cost.gold * count,
+    food: unit.cost.food * count,
+    pop: unit.cost.pop * count,
+    energy: (unit.cost.energy || 0) * count
+  };
+  const approval = {
+    id: genId('app'),
+    type: 'recruit',
+    requesterId: myPlayerId,
+    requesterName: gameState.players[myPlayerId].name,
+    unitType, count, cost: totalCost,
+    status: 'pending',
+    timestamp: Date.now()
+  };
+  if (!gameState.approvals[myCountryId]) gameState.approvals[myCountryId] = [];
+  gameState.approvals[myCountryId].push(approval);
+  publish(CHANNELS.STATE, { type: 'approval_new', countryId: myCountryId, approval });
+  addSystemChat('country', `征兵请求已发送，等待皇帝审批...`);
+  closeModal('modal-recruit-confirm');
+}
+
+// ---------- 结盟/议和 弹窗 ----------
+function showDiploRequestPopup(req) {
+  if (_seenDiploPopups.has(req.id)) return;
+  _seenDiploPopups.add(req.id);
+  const fromCountry = gameState.countries[req.fromCountryId];
+  const typeText = { ally: '结盟', peace: '议和' }[req.type] || req.type;
+  const name = fromCountry ? fromCountry.name : '他国';
+  AudioManager.playSuccess();
+  showFloatWindow({
+    id: 'diplo-' + req.id,
+    title: `📨 ${name} 向你发出${typeText}申请`,
+    cls: 'gold',
+    ttl: 0,
+    body: `<div style="text-align:center;font-size:14px;margin-bottom:4px;">${name} 想与你${req.type === 'ally' ? '结盟' : '议和'}</div><div style="text-align:center;color:var(--text-2);font-size:12px;">是否同意？</div>`,
+    buttons: [
+      { text: '拒绝', cls: 'red', onClick: () => { rejectDiplomacyRequest(req.id); closeFloatWindow('diplo-' + req.id); } },
+      { text: '同意', cls: 'green', onClick: () => { acceptDiplomacyRequest(req.id); closeFloatWindow('diplo-' + req.id); } }
+    ]
+  });
+}
+
+// 事件委托：点菜按钮 / 用餐 / 点菜页签切换
+document.addEventListener('click', (e) => {
+  if (e.target.closest('#btn-life')) { openDining(); return; }
+  if (e.target.closest('#btn-eat-meal')) { eatMeal(); return; }
+  const dtab = e.target.closest('.dining-tab');
+  if (dtab) {
+    diningTab = dtab.dataset.dtab;
+    document.querySelectorAll('.dining-tab').forEach(t => t.classList.toggle('active', t === dtab));
+    renderDiningList();
+  }
+});
+
 </script>
 
 <!-- 税率剧情弹窗 -->
@@ -10321,6 +11416,77 @@ function handleDiplomacyActionFromApproval(approval) {
     <div class="modal-footer" style="justify-content:center;gap:16px;">
       <button class="pixel-btn red" id="btn-tax-kill" style="min-width:120px;">⚔️ 斩杀此人</button>
       <button class="pixel-btn gold" id="btn-tax-listen" style="min-width:120px;">📜 听从建议</button>
+    </div>
+  </div>
+</div>
+
+<!-- 悬浮窗层 -->
+<div id="float-layer"></div>
+
+<!-- 皇上属性面板 -->
+<div id="emperor-life-panel">
+  <div class="elp-title"><span id="elp-title-text">👑 皇上状态</span><span class="elp-dead" id="elp-dead-text" style="display:none;">已驾崩</span></div>
+  <div class="life-bar-row">
+    <div class="lb-label"><span>🍚 饱食度</span><span class="lb-val" id="elp-satiety">100</span></div>
+    <div class="life-bar"><div class="lb-fill" id="elp-satiety-fill" style="width:100%"></div></div>
+  </div>
+  <div class="life-bar-row">
+    <div class="lb-label"><span>😊 满意度</span><span class="lb-val" id="elp-satisfaction">100</span></div>
+    <div class="life-bar"><div class="lb-fill satisfaction" id="elp-satisfaction-fill" style="width:100%"></div></div>
+  </div>
+  <div class="life-bar-row">
+    <div class="lb-label"><span>💧 水分值</span><span class="lb-val" id="elp-water">100</span></div>
+    <div class="life-bar"><div class="lb-fill water" id="elp-water-fill" style="width:100%"></div></div>
+  </div>
+  <div style="font-size:10px;color:var(--text-2);text-align:center;" id="elp-tip"></div>
+</div>
+
+<!-- 丞相征兵确认弹窗 -->
+<div class="modal-overlay" id="modal-recruit-confirm">
+  <div class="modal" style="min-width:380px;max-width:460px;">
+    <div class="modal-header">
+      <h2>⚔️ 请求征兵</h2>
+    </div>
+    <div class="modal-body" style="font-size:13px;line-height:1.8;color:var(--text-0);">
+      <p style="font-size:14px;text-align:center;margin-bottom:10px;">是否向皇上请求征兵？</p>
+      <div id="recruit-confirm-detail" style="background:var(--bg-1);border:2px solid var(--gold-0);padding:10px;font-size:12px;color:var(--text-1);"></div>
+      <p style="color:var(--text-2);font-size:11px;margin-top:8px;">· 请求发出后需皇上批准方可生效<br>· 批准后会在此通知你结果</p>
+    </div>
+    <div class="modal-footer">
+      <button class="pixel-btn" onclick="closeModal('modal-recruit-confirm')">算了</button>
+      <button class="pixel-btn gold" onclick="confirmRecruitRequest()">请求</button>
+    </div>
+  </div>
+</div>
+
+<!-- 皇上点菜弹窗 -->
+<div class="modal-overlay" id="modal-dining">
+  <div class="modal" style="min-width:520px;max-width:680px;">
+    <div class="modal-header">
+      <h2>🍽️ 皇上用膳</h2>
+      <button class="pixel-btn small" onclick="closeModal('modal-dining')">✕</button>
+    </div>
+    <div class="modal-body" style="padding:0;">
+      <div style="padding:10px 12px;border-bottom:3px solid var(--border-dark);font-size:12px;color:var(--text-1);display:flex;justify-content:space-between;">
+        <span>💰 国库：<span style="color:var(--gold-1);" id="dining-gold">0</span></span>
+        <span>🍽️ 本回合可用餐：<span style="color:var(--gold-1);" id="dining-meals-left">2</span>/2</span>
+        <span style="color:var(--text-2);">一顿最多365道，每道限重复5次</span>
+      </div>
+      <div class="dining-tabs">
+        <div class="dining-tab active" data-dtab="dishes">🍚 菜品 (100)</div>
+        <div class="dining-tab" data-dtab="drinks">🍶 饮水 (15)</div>
+        <div class="dining-tab" data-dtab="packages">🎁 套餐 (5)</div>
+      </div>
+      <div class="dining-list" id="dining-list"></div>
+      <div class="dining-cart">
+        <div class="dc-title">🧺 本餐食单（合计菜品：<span id="dc-count">0</span>/365 道）</div>
+        <div id="dc-rows"><div style="color:var(--text-2);font-size:11px;">尚未点菜，选好菜品后一并开吃</div></div>
+        <div class="dc-total">合计费用：<span class="price" id="dc-total-price">0</span> 两</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="pixel-btn" onclick="closeModal('modal-dining')">稍后再吃</button>
+      <button class="pixel-btn gold" id="btn-eat-meal">🍴 开吃（共1餐）</button>
     </div>
   </div>
 </div>
